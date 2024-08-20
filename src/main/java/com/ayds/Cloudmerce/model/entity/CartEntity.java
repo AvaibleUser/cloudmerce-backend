@@ -33,7 +33,7 @@ public class CartEntity {
     private DeliveryType deliveryType;
 
     @Column(name = "payment_method_id", nullable = false)
-    private Integer paymentMethodId;
+    private Long paymentMethodId;
 
     @Column(name = "status_id", nullable = false)
     private Integer statusId;

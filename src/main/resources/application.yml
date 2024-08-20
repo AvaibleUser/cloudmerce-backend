@@ -22,3 +22,9 @@ security:
     token:
       secret-key: ${JWT_SECRET}
       expiration-time-min: 1440
+
+aws:
+  accessKey: ${AWS_ACCESS_KEY}
+  secretKey: ${AWS_SECRET_KEY}
+  s3:
+    region: region
