@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: Cloudmerce
+
+  datasource:
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    url: jdbc:postgresql://${DB_HOST}/${DB_DATABASE}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    open-in-view: false
+
+server:
+  port: 8080
+
+aws:
+  accessKey: ${AWS_ACCESS_KEY}
+  secretKey: ${AWS_SECRET_KEY}
+  s3:
+    region: region
