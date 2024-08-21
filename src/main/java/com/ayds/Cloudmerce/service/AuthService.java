@@ -1,5 +1,6 @@
 package com.ayds.Cloudmerce.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,10 +14,10 @@ import com.ayds.Cloudmerce.model.entity.UserEntity;
 import com.ayds.Cloudmerce.repository.UserRepository;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public UserEntity registerUser(SignUpDto user) {
         if (userRepository.existsByUsername(user.username())) {

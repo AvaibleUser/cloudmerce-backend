@@ -1,6 +1,7 @@
 package com.ayds.Cloudmerce.model.entity;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -33,6 +34,20 @@ public class UserEntity implements UserDetails {
     private String username;
 
     private String password;
+
+    private String nombre;
+
+    private String correo;
+
+    private String direccion;
+
+    private String nit;
+
+    //TODO agregar la entidad ROL como atributo
+    //TODO agregar la entidad PREFERENCIA PAGO como atributo
+
+
+
 
     @Enumerated(EnumType.STRING)
     private UserRole role;
