@@ -16,8 +16,12 @@ spring:
 server:
   port: 8080
 
+config:
+  min-length-category: 5
+
 aws:
   accessKey: ${AWS_ACCESS_KEY}
   secretKey: ${AWS_SECRET_KEY}
   s3:
     region: region
+    bucketName: bucket
