@@ -1,6 +1,5 @@
 package com.ayds.Cloudmerce.service;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,22 +21,27 @@ public class FileStorageService {
     @Value("${aws.s3.bucketName}")
     private String bucketName;
 
-    public String store(String filename, MultipartFile file) throws IOException {
+    public String store(String filename, MultipartFile file) {
         if (file.isEmpty()) {
-            throw new FileNotFoundException("Failed to store empty file.");
+            throw new IllegalArgumentException("The file must have any content.");
         }
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(file.getContentType());
         metadata.setContentLength(file.getSize());
 
-        PutObjectRequest s3PutRequest = new PutObjectRequest(bucketName, filename, file.getInputStream(), metadata);
+        PutObjectRequest s3PutRequest;
+        try {
+            s3PutRequest = new PutObjectRequest(bucketName, filename, file.getInputStream(), metadata);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         s3Client.putObject(s3PutRequest);
 
         return loadUrl(filename);
     }
 
-    public String store(MultipartFile file) throws IOException {
+    public String store(MultipartFile file) {
         String filename = file.getOriginalFilename();
         return store(filename, file);
     }
@@ -46,7 +50,7 @@ public class FileStorageService {
         return s3Client.getUrl(bucketName, filename).toExternalForm();
     }
 
-    public void delete(String filename) throws IOException {
+    public void delete(String filename) {
         DeleteObjectRequest s3DeleteRequest = new DeleteObjectRequest(bucketName, filename);
         s3Client.deleteObject(s3DeleteRequest);
     }
