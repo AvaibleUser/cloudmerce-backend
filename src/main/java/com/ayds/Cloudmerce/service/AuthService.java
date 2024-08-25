@@ -1,7 +1,6 @@
 package com.ayds.Cloudmerce.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,16 +19,16 @@ public class AuthService implements UserDetailsService {
     private final UserRepository userRepository;
 
     public UserEntity registerUser(SignUpDto user) {
-        if (userRepository.existsByUsername(user.username())) {
+        if (userRepository.existsByName(user.username())) {
             throw new DuplicateKeyException("Username already exists");
         }
-        String encryptedPassword = new BCryptPasswordEncoder().encode(user.password());
-        UserEntity newUser = new UserEntity(user.username(), encryptedPassword, user.role());
+        String encryptedPassword = new BCryptPasswordEncoder().encode(user.password()); //
+        UserEntity newUser = new UserEntity(); //TODO crear un mapper que retorne un nuevo usuario (como entidad) en base al DTO
         return userRepository.save(newUser);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username);
+        return null;
     }
 }
