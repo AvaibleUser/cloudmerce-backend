@@ -32,6 +32,7 @@ public class AuthConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(POST, "/api/auth/**").permitAll()
+                        .requestMatchers(POST, "/api/sales/**").permitAll()
                         .requestMatchers(GET, "/api/admin").hasRole("ADMIN")
                         .requestMatchers(POST, "/api/admin").hasRole("ADMIN")
                         .requestMatchers(PUT, "/api/admin").hasRole("ADMIN")
