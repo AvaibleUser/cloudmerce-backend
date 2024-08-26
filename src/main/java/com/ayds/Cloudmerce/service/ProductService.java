@@ -1,6 +1,7 @@
 package com.ayds.Cloudmerce.service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -16,6 +17,7 @@ import org.springframework.util.ObjectUtils;
 
 import com.ayds.Cloudmerce.enums.ProductState;
 import com.ayds.Cloudmerce.model.dto.PagedProductFilteredDto;
+import com.ayds.Cloudmerce.model.dto.ProductDto;
 import com.ayds.Cloudmerce.model.dto.ProductRegisterDto;
 import com.ayds.Cloudmerce.model.dto.ProductUpdateDto;
 import com.ayds.Cloudmerce.model.entity.CategoryEntity;
@@ -23,6 +25,8 @@ import com.ayds.Cloudmerce.model.entity.ImageEntity;
 import com.ayds.Cloudmerce.model.entity.ProductCategoryEntity;
 import com.ayds.Cloudmerce.model.entity.ProductEntity;
 import com.ayds.Cloudmerce.model.entity.ProductImageEntity;
+import com.ayds.Cloudmerce.repository.CategoryRepository;
+import com.ayds.Cloudmerce.repository.ImageRepository;
 import com.ayds.Cloudmerce.repository.ProductCategoryRepository;
 import com.ayds.Cloudmerce.repository.ProductImageRepository;
 import com.ayds.Cloudmerce.repository.ProductRepository;
@@ -38,16 +42,41 @@ public class ProductService {
     private ProductRepository productRepository;
 
     @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
     private ProductCategoryRepository productCategoryRepository;
+
+    @Autowired
+    private ImageRepository imageRepository;
 
     @Autowired
     private ProductImageRepository productImageRepository;
 
-    public Optional<ProductEntity> findProduct(long productId) {
-        return productRepository.findById(productId);
+    private static ProductDto toProductDto(ProductEntity product) {
+        return new ProductDto(product.getId(), product.getName(), product.getDescription(),
+                product.getPrice(), product.getStock(), product.getState(), product.getCreationAt(),
+                product.getProductCategories()
+                        .stream()
+                        .map(ProductCategoryEntity::getCategory)
+                        .map(CategoryEntity::getName)
+                        .toList(),
+                product.getProductImages()
+                        .stream()
+                        .map(ProductImageEntity::getImage)
+                        .map(ImageEntity::getUrl)
+                        .toList());
     }
 
-    public Page<ProductEntity> findPagedProductsFilteredBy(PagedProductFilteredDto filters) {
+    public Optional<ProductDto> findProduct(long productId) {
+        return productRepository.findByIdAndStateNot(productId, ProductState.DELETED).map(ProductService::toProductDto);
+    }
+
+    public Optional<ProductDto> findProductForCustomer(long productId) {
+        return productRepository.findByIdAndState(productId, ProductState.VISIBLE).map(ProductService::toProductDto);
+    }
+
+    public Page<ProductDto> findPagedProductsFilteredBy(PagedProductFilteredDto filters) {
         Optional<Specification<ProductEntity>> optSpecification = Optional.<Specification<ProductEntity>>empty();
         Function<Specification<ProductEntity>, Optional<Specification<ProductEntity>>> addFilter = (
                 filter) -> optSpecification.map((spec) -> spec.and(filter)).or(() -> Optional.of(filter));
@@ -72,27 +101,29 @@ public class ProductService {
         }
 
         PageRequest pageReq = PageRequest.of(filters.page(), filters.size() == 0 ? 20 : filters.size(),
-                Sort.by(filters.descending() ? Direction.DESC : Direction.ASC, filters.sortedBy()));
+                ObjectUtils.isEmpty(filters.sortedBy())
+                        ? Sort.unsorted()
+                        : Sort.by(filters.descending() ? Direction.DESC : Direction.ASC, filters.sortedBy()));
 
-        return productRepository.findAll(optSpecification.orElse(Specification.where(null)), pageReq);
+        return productRepository.findAll(optSpecification.orElse(Specification.where(null)), pageReq)
+                .map(ProductService::toProductDto);
     }
 
     @Transactional
-    public ProductEntity saveProduct(ProductRegisterDto product, Collection<CategoryEntity> categories,
-            Collection<ImageEntity> images) {
-        if (ObjectUtils.isEmpty(product.categories())) {
-            throw new IllegalArgumentException("The product must have at least one category");
-        }
+    public ProductDto saveProduct(ProductRegisterDto product, Collection<String> imageUrls) {
+        List<CategoryEntity> categories = categoryRepository.findAllById(product.categories());
+
         if (ObjectUtils.isEmpty(categories) || product.categories().size() != categories.size()) {
             int diff = Math.abs(product.categories().size() - categories.size());
             throw new IllegalArgumentException("There are " + diff + " categories not found");
         }
-        if (ObjectUtils.isEmpty(product.images())) {
-            throw new IllegalArgumentException("The product must have at least one category");
-        }
-        if (ObjectUtils.isEmpty(images) || product.images().size() != images.size()) {
-            int diff = Math.abs(product.images().size() - images.size());
-            throw new IllegalArgumentException("There are " + diff + " images not found");
+
+        List<ImageEntity> images = imageRepository.saveAll(imageUrls.stream()
+                .map(ImageEntity::new)
+                .toList());
+
+        if (ObjectUtils.isEmpty(images)) {
+            throw new IllegalArgumentException("At least one image is needed");
         }
         ProductEntity newProduct = productRepository.save(new ProductEntity(
                 product.name(), product.description(), product.price(), product.stock()));
@@ -105,17 +136,17 @@ public class ProductService {
                 .map(image -> new ProductImageEntity(image, newProduct))
                 .toList());
 
-        return newProduct;
+        return toProductDto(newProduct);
     }
 
     @Transactional
-    public ProductEntity updateProduct(long productId, ProductUpdateDto product) {
+    public ProductDto updateProduct(long productId, ProductUpdateDto product) {
         ProductEntity dbProduct = productRepository.findById(productId).get();
 
-        if (product.name() != null) {
+        if (!ObjectUtils.isEmpty(product.name())) {
             dbProduct.setName(product.name());
         }
-        if (product.description() != null) {
+        if (!ObjectUtils.isEmpty(product.description())) {
             dbProduct.setDescription(product.description());
         }
         if (product.price() != null) {
@@ -124,18 +155,37 @@ public class ProductService {
         if (product.stock() != null) {
             dbProduct.setStock(product.stock());
         }
-        if (product.state() != null) {
+        if (product.state() != null && product.state() != ProductState.DELETED) {
             dbProduct.setState(product.state());
         }
-        // if (product.categories() != null) {
-        // if (product.categories().isEmpty()) {
-        // throw new IllegalArgumentException("The product must have at least one
-        // category");
-        // }
-        // Set<CategoryEntity> categories =
-        // categoryRepository.findAllByCategory(product.categories());
-        // dbProduct.setProductCategories(null);(categories);
-        // }
+        if (product.categories() != null) {
+            if (product.categories().isEmpty()) {
+                throw new IllegalArgumentException("The product must have at least one category");
+            }
+            Collection<ProductCategoryEntity> productCategoriesRemoved = productCategoryRepository
+                    .findByProductIdAndCategoryIdNotIn(dbProduct.getId(), product.categories());
+
+            List<Long> categoryIds = productCategoriesRemoved.stream()
+                    .map(ProductCategoryEntity::getCategory)
+                    .map(CategoryEntity::getId)
+                    .toList();
+
+            List<Long> newCategories = product.categories()
+                    .stream()
+                    .filter(category -> !categoryIds.contains(category))
+                    .toList();
+
+            List<CategoryEntity> categories = categoryRepository.findAllById(newCategories);
+
+            if (ObjectUtils.isEmpty(categories) || newCategories.size() != categories.size()) {
+                int diff = Math.abs(product.categories().size() - categories.size());
+                throw new IllegalArgumentException("There are " + diff + " categories not found");
+            }
+
+            productCategoryRepository.saveAll(categories.stream()
+                    .map(category -> new ProductCategoryEntity(category, dbProduct))
+                    .toList());
+        }
         // if (product.imageUrls() != null) {
         // if (product.imageUrls().isEmpty()) {
         // throw new IllegalArgumentException("The product must have at least one
@@ -146,7 +196,7 @@ public class ProductService {
         // dbProduct.setCategories(categories);
         // }
 
-        return productRepository.save(dbProduct);
+        return toProductDto(productRepository.save(dbProduct));
     }
 
     public void deleteProduct(long productId) {

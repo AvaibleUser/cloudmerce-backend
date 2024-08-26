@@ -4,15 +4,20 @@ import java.util.Set;
 
 import com.ayds.Cloudmerce.enums.ProductState;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.NonNull;
+import lombok.With;
+
 public record PagedProductFilteredDto(
-        int page,
-        int size,
+        @PositiveOrZero int page,
+        @PositiveOrZero int size,
         boolean descending,
-        String sortedBy,
+        String[] sortedBy,
         String name,
         String description,
-        RangeDto<Float> price,
-        Long stock,
+        @Valid RangeDto<Float> price,
+        @PositiveOrZero @With(onMethod_ = @NonNull) Long stock,
         ProductState state,
         Set<Long> categories) {
 }

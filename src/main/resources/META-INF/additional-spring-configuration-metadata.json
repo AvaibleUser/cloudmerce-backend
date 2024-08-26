@@ -25,11 +25,6 @@
     "description": "The region where the S3 bucket would be"
   },
   {
-    "name": "config.min-length-category",
-    "type": "java.lang.Integer",
-    "description": "The minimum length that must have the name of a category"
-  },
-  {
     "name": "aws.s3.bucketName",
     "type": "java.lang.String",
     "description": "A description for 'aws.s3.bucketName'"
