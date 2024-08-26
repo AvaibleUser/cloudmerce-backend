@@ -2,14 +2,15 @@ package com.ayds.Cloudmerce.model.dto;
 
 import java.util.Set;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.NonNull;
-import lombok.With;
 
 public record ProductRegisterDto(
-        @NonNull String name,
-        @NonNull String description,
-        @NonNull Float price,
-        long stock,
-        @NonNull Set<Long> categories,
-        @With @NonNull Set<Long> images) {
+        @NotBlank @NonNull String name,
+        @NotBlank @NonNull String description,
+        @PositiveOrZero @NonNull Float price,
+        @PositiveOrZero @NonNull Long stock,
+        @NotEmpty @NonNull Set<Long> categories) {
 }

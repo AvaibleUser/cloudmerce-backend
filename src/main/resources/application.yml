@@ -23,9 +23,6 @@ security:
       secret-key: ${JWT_SECRET}
       expiration-time-min: 1440
 
-config:
-  min-length-category: 5
-
 aws:
   accessKey: ${AWS_ACCESS_KEY}
   secretKey: ${AWS_SECRET_KEY}
