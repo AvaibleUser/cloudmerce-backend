@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity(name = "cart_item")
 @Getter
 @NoArgsConstructor
-public class CartItem {
+public class CartItemEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
