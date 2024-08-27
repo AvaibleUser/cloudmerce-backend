@@ -32,7 +32,7 @@ public class TokenService {
 
             return JWT.create()
                     .withSubject(String.valueOf(user.getId()))
-                    .withClaim("username", user.getUsername())
+                    .withClaim("name", user.getName())
                     .withExpiresAt(genAccessExpirationDate())
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
