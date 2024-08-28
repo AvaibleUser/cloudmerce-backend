@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Table(schema = "sales_control")
+@Table(name = "cart", schema = "sales_control")
 @Entity(name = "cart")
 @Getter
 @Setter
@@ -38,6 +38,6 @@ public class CartEntity {
     @Column(name = "user_id", nullable = false)
     private Integer userId;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 }

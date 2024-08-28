@@ -11,7 +11,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class CartItemDTO {
 
+    private Integer id;
     private Integer productId;
     private Integer quantity;
     private BigDecimal subTotal;
+    private Integer cartId;
 }
