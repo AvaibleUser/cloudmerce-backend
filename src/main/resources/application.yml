@@ -8,6 +8,7 @@ spring:
     url: jdbc:postgresql://${DB_HOST}/${DB_DATABASE}
 
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: update
 

@@ -12,8 +12,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class OrderDTO {
 
+    private Integer id;
+    private Integer cartId;
     private String deliveryAddress;
-    private BigDecimal shippingCost;
+    private BigDecimal deliveryCost;
     private Integer statusId;
     private LocalDateTime orderDate;
+    private LocalDateTime deliveryDate;
+    private LocalDateTime shippingDate;
 }
