@@ -1,16 +1,31 @@
 package com.ayds.Cloudmerce.service;
 
 import com.ayds.Cloudmerce.model.dto.cart.OrderDTO;
+import com.ayds.Cloudmerce.model.entity.CartEntity;
 import com.ayds.Cloudmerce.model.entity.OrderEntity;
+import com.ayds.Cloudmerce.model.entity.ProcessStatusEntity;
 import com.ayds.Cloudmerce.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
+
+    public OrderEntity existOrder(Integer id) {
+        return this.orderRepository.findById(id).orElse(null);
+    }
+
+    public OrderDTO updateStatusOrder(OrderEntity orderUpdate , ProcessStatusEntity processStatus) {
+        orderUpdate.setStatusId(processStatus.getId());
+        return this.convertToDTO(this.orderRepository.save(orderUpdate));
+    }
+
 
     /**
      * register the order in BD

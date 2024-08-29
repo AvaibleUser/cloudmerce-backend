@@ -1,9 +1,6 @@
 package com.ayds.Cloudmerce.config;
 
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.PUT;
+import static org.springframework.http.HttpMethod.*;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,17 +27,10 @@ public class AuthConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
+                .cors(cors -> cors.disable())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(POST, "/api/auth/*").permitAll()
-                        .requestMatchers(POST, "/api/sales/*").permitAll()
-                        .requestMatchers(GET, "/api/admin").hasRole("ADMIN")
-                        .requestMatchers(POST, "/api/admin").hasRole("ADMIN")
-                        .requestMatchers(PUT, "/api/admin").hasRole("ADMIN")
-                        .requestMatchers(DELETE, "/api/admin").hasRole("ADMIN")
-                        .anyRequest().authenticated())
-                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
                 .build();
     }
 
