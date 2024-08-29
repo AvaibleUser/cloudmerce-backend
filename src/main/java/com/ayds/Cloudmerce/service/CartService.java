@@ -5,6 +5,8 @@ import com.ayds.Cloudmerce.model.dto.cart.CartItemDTO;
 import com.ayds.Cloudmerce.model.dto.cart.CartRequestDTO;
 import com.ayds.Cloudmerce.model.dto.cart.OrderDTO;
 import com.ayds.Cloudmerce.model.entity.CartEntity;
+import com.ayds.Cloudmerce.model.entity.OrderEntity;
+import com.ayds.Cloudmerce.model.entity.ProcessStatusEntity;
 import com.ayds.Cloudmerce.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,40 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartItemService cartItemService;
     private final OrderService orderService;
+    private final ProcessStatusService processStatusService;
+
+
+    public CartEntity existCart(Integer idCart){
+        return this.cartRepository.findById(idCart).orElse(null);
+    }
+
+    public CartDTO updateCart(CartEntity cartUpdate, Integer statusId) {
+        cartUpdate.setStatusId(statusId);
+        return this.convertToCartDTO(this.cartRepository.save(cartUpdate));
+    }
+
+    @Transactional
+    public OrderDTO updateStatusOrderAndCart(OrderEntity orderUpdate , ProcessStatusEntity processStatus){
+        this.updateDateProcessOrder(orderUpdate, processStatus);
+        return this.orderService.updateStatusOrder(orderUpdate, processStatus);
+    }
+
+    private void updateDateProcessOrder(OrderEntity orderUpdate, ProcessStatusEntity processStatus){
+        LocalDateTime dateTime = LocalDateTime.now();
+        switch (processStatus.getStatus()){
+            case "Enviado":
+                orderUpdate.setShippingDate(dateTime);
+                break;
+            case "Entregado":
+                orderUpdate.setDeliveryDate(dateTime);
+                //marcar como completado el carrito
+                ProcessStatusEntity process = this.processStatusService.existsProcessStatusByProcessStatus("Completado");
+                CartEntity cartUpdate = this.existCart(orderUpdate.getCartId());
+                this.updateCart(cartUpdate,process.getId());
+                break;
+        }
+    }
+
 
     @Transactional
     public CartDTO registerCart(CartDTO cartDTO) {
