@@ -1,6 +1,15 @@
 package com.ayds.Cloudmerce.model.entity;
 
+import java.time.Instant;
+
+import org.hibernate.annotations.CreationTimestamp;
+
+import com.ayds.Cloudmerce.enums.NotificationStatus;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -11,23 +20,31 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "product_image_url"/*, schema = "warehouse_control"*/)
+@Table(name = "product_status_notification"/*, schema = "warehouse_control"*/)
 @Getter
 @NoArgsConstructor
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class ProductImageEntity {
+public class ProductNotificationEntity {
 
     @Id
     @GeneratedValue
     private Long id;
 
+    @Setter
     @NonNull
-    @ManyToOne
-    @JoinColumn(name = "image_id")
-    private ImageEntity image;
+    @Enumerated(EnumType.STRING)
+    private NotificationStatus status;
+
+    @NonNull
+    private String description;
+
+    @Column(name = "recorded_at")
+    @CreationTimestamp
+    private Instant createdAt;
 
     @NonNull
     @ManyToOne

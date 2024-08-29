@@ -1,6 +1,7 @@
 package com.ayds.Cloudmerce.model.entity;
 
 import static com.ayds.Cloudmerce.enums.ProductState.VISIBLE;
+import static jakarta.persistence.FetchType.EAGER;
 
 import java.time.Instant;
 import java.util.Set;
@@ -24,8 +25,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-@Table
-@Entity(name = "products")
+@Entity
+@Table(name = "product"/* , schema = "warehouse_control" */)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -57,9 +58,12 @@ public class ProductEntity {
     @CreationTimestamp
     private Instant creationAt;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = EAGER)
     private Set<ProductCategoryEntity> productCategories;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = EAGER)
     private Set<ProductImageEntity> productImages;
+
+    @OneToMany(mappedBy = "product")
+    private Set<ProductNotificationEntity> productNotifications;
 }

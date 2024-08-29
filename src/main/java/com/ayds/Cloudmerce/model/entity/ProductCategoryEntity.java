@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-@Table
-@Entity(name = "product_categories")
+@Entity
+@Table(name = "product_category"/*, schema = "warehouse_control"*/)
 @Getter
 @NoArgsConstructor
 @RequiredArgsConstructor
