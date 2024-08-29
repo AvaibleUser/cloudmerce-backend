@@ -31,14 +31,14 @@ public class CategoryController {
     public ResponseEntity<List<CategoryDto>> getAllCategories() {
         List<CategoryDto> categories = categoryService.findAllCategories();
 
-        return ResponseEntity.ok().body(categories);
+        return ResponseEntity.ok(categories);
     }
 
     @PostMapping
     public ResponseEntity<CategoryDto> addCategory(@RequestBody @Valid CategoryRegisterDto category) {
         CategoryDto savedCategory = categoryService.saveCategory(category);
 
-        return ResponseEntity.ok().body(savedCategory);
+        return ResponseEntity.ok(savedCategory);
     }
 
     @PutMapping("/{categoryId}")
@@ -46,6 +46,6 @@ public class CategoryController {
             @RequestBody @Valid CategoryUpdateDto category) {
         CategoryDto updatedCategory = categoryService.updateCategory(categoryId, category);
 
-        return ResponseEntity.ok().body(updatedCategory);
+        return ResponseEntity.ok(updatedCategory);
     }
 }
