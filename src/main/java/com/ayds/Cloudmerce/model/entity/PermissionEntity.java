@@ -3,7 +3,7 @@ package com.ayds.Cloudmerce.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Table(name = "user_control.permission")
+@Table(name = "permission",schema = "user_control")
 @Entity(name="permission")
 @Getter
 @Setter

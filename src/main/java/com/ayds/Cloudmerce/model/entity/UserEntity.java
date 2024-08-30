@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.ayds.Cloudmerce.enums.UserRole;
 
-@Table(name = "control_user.user")
+@Table(name = "user",schema = "user_control")
 @Entity(name = "user")
 @Getter
 @Setter

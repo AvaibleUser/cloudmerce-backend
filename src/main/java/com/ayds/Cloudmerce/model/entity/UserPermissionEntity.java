@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.context.annotation.Lazy;
 
-@Table(name = "user_control.user_permission")
+@Table(name = "user_permission",schema = "user_control")
 @Entity(name = "user_permission")
 @Getter
 @Setter

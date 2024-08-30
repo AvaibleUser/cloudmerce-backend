@@ -4,7 +4,7 @@ package com.ayds.Cloudmerce.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Table(name = "user_control.role")
+@Table(name = "role",schema = "user_control")
 @Entity(name = "role")
 @Getter
 @Setter
