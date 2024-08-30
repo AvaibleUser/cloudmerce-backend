@@ -14,7 +14,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @Entity
-@Table(name = "image_url"/*, schema = "warehouse_control"*/)
+@Table(name = "image_url", schema = "warehouse_control")
 @Getter
 @NoArgsConstructor
 @RequiredArgsConstructor

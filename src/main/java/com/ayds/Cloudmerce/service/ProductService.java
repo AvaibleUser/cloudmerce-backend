@@ -1,9 +1,9 @@
 package com.ayds.Cloudmerce.service;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,21 +170,22 @@ public class ProductService {
                 throw new IllegalArgumentException("The product must have at least one category");
             }
             Collection<ProductCategoryEntity> productCategoriesRemoved = productCategoryRepository
-                    .findByProductIdAndCategoryIdNotIn(dbProduct.getId(), product.categories());
-
-            List<Long> categoryIds = productCategoriesRemoved.stream()
-                    .map(ProductCategoryEntity::getCategory)
-                    .map(CategoryEntity::getId)
-                    .toList();
-
-            List<Long> newCategories = product.categories()
+                    .findByProductIdAndCategoryIdNotIn(dbProduct.getId(), product.categories())
                     .stream()
-                    .filter(category -> !categoryIds.contains(category))
+                    .filter(category -> {
+                        if (product.categories().contains(category.getCategory().getId())) {
+                            product.categories().remove(category.getCategory().getId());
+                            return false;
+                        }
+                        return true;
+                    })
                     .toList();
 
-            List<CategoryEntity> categories = categoryRepository.findAllById(newCategories);
+            productCategoryRepository.deleteAll(productCategoriesRemoved);
 
-            if (ObjectUtils.isEmpty(categories) || newCategories.size() != categories.size()) {
+            List<CategoryEntity> categories = categoryRepository.findAllById(product.categories());
+
+            if (ObjectUtils.isEmpty(categories) || product.categories().size() != categories.size()) {
                 int diff = Math.abs(product.categories().size() - categories.size());
                 throw new IllegalArgumentException("There are " + diff + " categories not found");
             }
@@ -193,7 +194,7 @@ public class ProductService {
                     .map(category -> new ProductCategoryEntity(category, dbProduct))
                     .toList());
 
-            dbProduct.setProductCategories(Set.copyOf(productCategories));
+            dbProduct.setProductCategories(new HashSet<>(productCategories));
         }
         // if (product.imageUrls() != null) {
         // if (product.imageUrls().isEmpty()) {

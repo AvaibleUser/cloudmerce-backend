@@ -20,7 +20,7 @@ public class ProductNotificationService {
 
     private static ProductNotificationDto toNotificationDto(ProductNotificationEntity notification) {
         return new ProductNotificationDto(notification.getId(), notification.getStatus(), notification.getDescription(),
-                notification.getCreatedAt(), notification.getProduct());
+                notification.getCreatedAt(), notification.getProduct().getId());
     }
 
     public List<ProductNotificationDto> findAllNotifications(boolean unread) {

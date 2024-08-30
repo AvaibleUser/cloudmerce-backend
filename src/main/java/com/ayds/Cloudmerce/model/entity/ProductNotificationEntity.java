@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "product_status_notification"/*, schema = "warehouse_control"*/)
+@Table(name = "product_notification_status", schema = "warehouse_control")
 @Getter
 @NoArgsConstructor
 @RequiredArgsConstructor
@@ -42,7 +42,7 @@ public class ProductNotificationEntity {
     @NonNull
     private String description;
 
-    @Column(name = "recorded_at")
+    @Column(name = "registration_date")
     @CreationTimestamp
     private Instant createdAt;
 
