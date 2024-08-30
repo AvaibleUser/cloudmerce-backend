@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "product"/* , schema = "warehouse_control" */)
+@Table(name = "product", schema = "warehouse_control")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -48,6 +48,7 @@ public class ProductEntity {
     private Float price;
 
     @NonNull
+    @Column(name = "available_quantity")
     private Long stock;
 
     @NonNull

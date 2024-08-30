@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "category"/*, schema = "warehouse_control"*/)
+@Table(name = "category", schema = "warehouse_control")
 @Getter
 @NoArgsConstructor
 @RequiredArgsConstructor
