@@ -27,7 +27,24 @@ public class PaymentMethodService {
                 .collect(Collectors.toList());
     }
 
+    public PaymentMethodEntity getPaymentMethodById(Long id) {
+        return this.paymentMethodRepository.findById(id).orElse(null);
+    }
+
     private PaymentMethodDTO convertPaymentMethodDTO(PaymentMethodEntity paymentMethodEntity) {
         return new PaymentMethodDTO(paymentMethodEntity.getId(), paymentMethodEntity.getName());
+    }
+
+    public List<PaymentMethodEntity> getAllPaymentMethodsEntity() {
+        return this.paymentMethodRepository.findAll();
+    }
+
+    public String paymentMethod(List<PaymentMethodEntity> lis, Long id) {
+        for (PaymentMethodEntity paymentMethodEntity : lis) {
+            if (paymentMethodEntity.getId().equals(id)) {
+                return paymentMethodEntity.getName();
+            }
+        }
+        return null;
     }
 }

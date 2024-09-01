@@ -1,11 +1,9 @@
 package com.ayds.Cloudmerce.service;
 
-import com.ayds.Cloudmerce.model.dto.cart.CartDTO;
-import com.ayds.Cloudmerce.model.dto.cart.CartItemDTO;
-import com.ayds.Cloudmerce.model.dto.cart.CartRequestDTO;
-import com.ayds.Cloudmerce.model.dto.cart.OrderDTO;
+import com.ayds.Cloudmerce.model.dto.cart.*;
 import com.ayds.Cloudmerce.model.entity.CartEntity;
 import com.ayds.Cloudmerce.model.entity.OrderEntity;
+import com.ayds.Cloudmerce.model.entity.PaymentMethodEntity;
 import com.ayds.Cloudmerce.model.entity.ProcessStatusEntity;
 import com.ayds.Cloudmerce.repository.CartRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +22,12 @@ public class CartService {
     private final CartItemService cartItemService;
     private final OrderService orderService;
     private final ProcessStatusService processStatusService;
+    private final PaymentMethodService paymentMethodService;
 
-    public List<CartEntity> getAllCartsWithItems() {
-        return cartRepository.findAll();
+    public List<CartResponseDto> getAllCartsWithItems() {
+        return cartRepository.findAll().stream()
+                .map(this::convertToCartDtoResponse)
+                .collect(Collectors.toList());
     }
 
     public CartEntity existCart(Integer idCart){
@@ -114,6 +116,33 @@ public class CartService {
         cartDTO.setStatusId(cartEntity.getStatusId());
         cartDTO.setPaymentMethodId(cartEntity.getPaymentMethodId());
         cartDTO.setCreatedAt(cartEntity.getCreatedAt());
+        if (!cartEntity.getCartItems().isEmpty()){
+            List<CartItemDTO> listDTO = cartEntity.getCartItems().stream()
+                    .map(this.cartItemService::convertToCartItemDTO)
+                    .collect(Collectors.toList());
+            cartDTO.setItems(listDTO);
+        }
+        return cartDTO;
+    }
+
+    private CartResponseDto convertToCartDtoResponse(CartEntity cartEntity) {
+        CartResponseDto cartDTO = new CartResponseDto();
+        List<ProcessStatusEntity> listProcess = this.processStatusService.getAllProcessStatusEntity();
+        List<PaymentMethodEntity> listPayment = this.paymentMethodService.getAllPaymentMethodsEntity();
+        cartDTO.setId(cartEntity.getId());
+        cartDTO.setTax(cartEntity.getTax());
+        cartDTO.setTotal(cartEntity.getTotal());
+        cartDTO.setDeliveryType(cartEntity.getDeliveryType());
+        cartDTO.setUserId(cartEntity.getUserId());
+        cartDTO.setStatus(this.processStatusService.processStatus(listProcess,cartEntity.getStatusId()));
+        cartDTO.setPaymentMethod(this.paymentMethodService.paymentMethod(listPayment,cartEntity.getPaymentMethodId()));
+        cartDTO.setCreatedAt(cartEntity.getCreatedAt());
+        if (!cartEntity.getCartItems().isEmpty()){
+            List<CartItemDTO> listDTO = cartEntity.getCartItems().stream()
+                    .map(this.cartItemService::convertToCartItemDTO)
+                    .collect(Collectors.toList());
+            cartDTO.setItems(listDTO);
+        }
         return cartDTO;
     }
 }
