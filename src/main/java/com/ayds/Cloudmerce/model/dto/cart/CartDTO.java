@@ -23,11 +23,11 @@ public class CartDTO {
     private BigDecimal total;
     @NonNull @Positive
     private BigDecimal tax;
-    @NonNull @NotBlank
+    @NonNull @Positive
     private Integer paymentMethodId;
     @NonNull @Positive
     private Integer statusId;
-    @NonNull @NotBlank
+    @NonNull
     private DeliveryType deliveryType;
     @NonNull @Positive
     private Integer userId;

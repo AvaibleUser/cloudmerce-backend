@@ -1,5 +1,6 @@
 package com.ayds.Cloudmerce.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,8 +24,10 @@ public class CartItemEntity {
     @Column(name = "subtotal", nullable = false, precision = 12, scale = 2)
     private BigDecimal subtotal;
 
-    @Column(name = "cart_id", nullable = false)
-    private Integer cartId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cart_id", nullable = false)
+    @JsonIgnore
+    private CartEntity cart;
 
     @Column(name = "product_id", nullable = false)
     private Integer productId;

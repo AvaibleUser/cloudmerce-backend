@@ -1,6 +1,7 @@
 package com.ayds.Cloudmerce.service;
 
 import com.ayds.Cloudmerce.model.dto.cart.CartItemDTO;
+import com.ayds.Cloudmerce.model.entity.CartEntity;
 import com.ayds.Cloudmerce.model.entity.CartItemEntity;
 import com.ayds.Cloudmerce.repository.CartItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,18 +18,18 @@ public class CartItemService {
     private final CartItemRepository cartItemRepository;
 
 
-    public List<CartItemDTO> registerCartItems(List<CartItemDTO> cartItemsDTO, Integer idCart) {
+    public List<CartItemDTO> registerCartItems(List<CartItemDTO> cartItemsDTO, CartEntity cart) {
         // Guardar los elementos y convertir a DTOs
         return cartItemsDTO.stream()
-                .map(cartItemDTO -> convertToCartItemEntity(cartItemDTO, idCart))
+                .map(cartItemDTO -> convertToCartItemEntity(cartItemDTO, cart))
                 .map(this.cartItemRepository::save)
                 .map(this::convertToCartItemDTO)
                 .collect(Collectors.toList());
     }
 
-    private CartItemEntity convertToCartItemEntity(CartItemDTO cartItemDTO,  Integer idCart) {
+    private CartItemEntity convertToCartItemEntity(CartItemDTO cartItemDTO, CartEntity cart) {
         CartItemEntity cartItemEntity = new CartItemEntity();
-        cartItemEntity.setCartId(idCart);
+        cartItemEntity.setCart(cart);
         cartItemEntity.setProductId(cartItemDTO.getProductId());
         cartItemEntity.setQuantity(cartItemDTO.getQuantity());
         cartItemEntity.setSubtotal(cartItemDTO.getSubTotal());
@@ -40,7 +41,7 @@ public class CartItemService {
         cartItemDTO.setProductId(cartItemEntity.getProductId());
         cartItemDTO.setQuantity(cartItemEntity.getQuantity());
         cartItemDTO.setSubTotal(cartItemEntity.getSubtotal());
-        cartItemDTO.setCartId(cartItemEntity.getCartId());
+        cartItemDTO.setCartId(cartItemEntity.getCart().getId());
         cartItemDTO.setId(cartItemEntity.getId());
         return cartItemDTO;
     }
