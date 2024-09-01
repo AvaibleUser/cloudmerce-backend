@@ -36,7 +36,7 @@ public class CartItemService {
         return cartItemEntity;
     }
 
-    private CartItemDTO convertToCartItemDTO(CartItemEntity cartItemEntity) {
+    public CartItemDTO convertToCartItemDTO(CartItemEntity cartItemEntity) {
         CartItemDTO cartItemDTO = new CartItemDTO();
         cartItemDTO.setProductId(cartItemEntity.getProductId());
         cartItemDTO.setQuantity(cartItemEntity.getQuantity());
