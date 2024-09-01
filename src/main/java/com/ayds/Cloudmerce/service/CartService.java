@@ -24,6 +24,9 @@ public class CartService {
     private final OrderService orderService;
     private final ProcessStatusService processStatusService;
 
+    public List<CartEntity> getAllCartsWithItems() {
+        return cartRepository.findAll();
+    }
 
     public CartEntity existCart(Integer idCart){
         return this.cartRepository.findById(idCart).orElse(null);
@@ -59,8 +62,9 @@ public class CartService {
 
     @Transactional
     public CartDTO registerCart(CartDTO cartDTO) {
-        CartDTO cartResponse = this.convertToCartDTO(cartRepository.save(this.convertToCartEntity(cartDTO)));
-        List<CartItemDTO> items = this.cartItemService.registerCartItems(cartDTO.getItems(),cartResponse.getId());
+        CartEntity cart = cartRepository.save(this.convertToCartEntity(cartDTO));
+        CartDTO cartResponse = this.convertToCartDTO(cart);
+        List<CartItemDTO> items = this.cartItemService.registerCartItems(cartDTO.getItems(),cart);
         cartResponse.setItems(items);
         return cartResponse;
     }
@@ -68,8 +72,9 @@ public class CartService {
     @Transactional
     public CartRequestDTO registerCartAndOrder(CartDTO cartDTO, OrderDTO orderDTO) {
         CartRequestDTO responseDTO = new CartRequestDTO();
-        CartDTO cartResponse = this.convertToCartDTO(cartRepository.save(this.convertToCartEntity(cartDTO)));
-        List<CartItemDTO> items = this.cartItemService.registerCartItems(cartDTO.getItems(),cartResponse.getId());
+        CartEntity cart = cartRepository.save(this.convertToCartEntity(cartDTO));
+        CartDTO cartResponse = this.convertToCartDTO(cart);
+        List<CartItemDTO> items = this.cartItemService.registerCartItems(cartDTO.getItems(),cart);
         cartResponse.setItems(items);
         OrderDTO orderResponse = this.orderService.registerOrder(orderDTO,cartResponse.getId());
         responseDTO.setOrder(orderResponse);

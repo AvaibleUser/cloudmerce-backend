@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Table(name = "cart", schema = "sales_control")
 @Entity(name = "cart")
@@ -40,4 +42,8 @@ public class CartEntity {
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    // Relación uno a muchos con CartItemEntity
+    @OneToMany(mappedBy = "cart", fetch = FetchType.EAGER)
+    private List<CartItemEntity> cartItems = new ArrayList<>();
 }

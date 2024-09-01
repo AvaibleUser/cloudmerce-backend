@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-
 public interface ProcessStatusRepository extends JpaRepository<ProcessStatusEntity, Integer> {
 
     Optional<ProcessStatusEntity> findByStatus(String status);

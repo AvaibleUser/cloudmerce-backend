@@ -1,11 +1,10 @@
 package com.ayds.Cloudmerce.controller;
 
-import com.ayds.Cloudmerce.model.dto.cart.CartDTO;
-import com.ayds.Cloudmerce.model.dto.cart.CartRequestDTO;
-import com.ayds.Cloudmerce.model.dto.cart.OrderDTO;
+import com.ayds.Cloudmerce.model.dto.cart.*;
 import com.ayds.Cloudmerce.model.entity.CartEntity;
 import com.ayds.Cloudmerce.model.entity.ProcessStatusEntity;
 import com.ayds.Cloudmerce.service.CartService;
+import com.ayds.Cloudmerce.service.PaymentMethodService;
 import com.ayds.Cloudmerce.service.ProcessStatusService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -16,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,6 +27,14 @@ public class CartController {
 
     @Autowired
     private ProcessStatusService processStatusService;
+
+    @Autowired
+    private PaymentMethodService paymentMethodService;
+
+    @GetMapping
+    public List<CartEntity> getAllCartsWithItems() {
+        return cartService.getAllCartsWithItems();
+    }
 
     @PostMapping
     public ResponseEntity<Object> createCartAndOrder(@Valid @RequestBody CartRequestDTO requestDTO, @RequestParam(value = "order", required = false, defaultValue = "false") boolean order) {
@@ -79,6 +87,24 @@ public class CartController {
             response.put("message", "A ocurrido un error al procesar el Carrito de Compras, Revisa los datos proporcionados, porfavor intentalo de nuevo");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/processStatus")
+    public ResponseEntity<Object> getAllProcessStatus(){
+        HashMap<String,Object> response = new HashMap<>();
+        List<ProcessStatusDTO> processRes = this.processStatusService.getAllProcessStatus();
+        response.put("message", "Lista de procesos que el carrito, pedido soportan");
+        response.put("data", processRes);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/paymentMethods")
+    public ResponseEntity<Object> getAllPaymentMethod(){
+        HashMap<String,Object> response = new HashMap<>();
+        List<PaymentMethodDTO> paymentMethodRess = this.paymentMethodService.getAllPaymentMethods();
+        response.put("message", "Lista de metodos de pago que soporta la aplicacion");
+        response.put("data", paymentMethodRess);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }
