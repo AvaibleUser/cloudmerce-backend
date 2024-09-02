@@ -100,6 +100,12 @@ public class CartController {
         return this.cartResponseService.responseSuccess(list,"Lista de items del carrito con id: "+ idCart, HttpStatus.OK);
     }
 
+    @GetMapping("/{idCart}")
+    public  ResponseEntity<Object> getCartById(@Valid @PathVariable("idCart") @Positive Integer idCart) {
+        CartResponseDto cartResponseDto = this.cartService.getCartById(idCart);
+        return this.cartResponseService.responseSuccess(cartResponseDto,"Datos del carrito con id: " + idCart, HttpStatus.OK);
+    }
+
     /*
      * aparado para peticiones GET con usuario especifico
      */
