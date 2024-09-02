@@ -21,12 +21,14 @@ public class CartResponseService {
     private final String MESSAGE = "message";
 
     public ResponseEntity<Object> responseSuccess(Object dataValue, String messageValue, HttpStatus status) {
+        this.response.clear();
         this.response.put(DATA, dataValue);
         this.response.put(MESSAGE, messageValue);
         return new ResponseEntity<>(this.response, status);
     }
 
     public ResponseEntity<Object> responseError(String messageValue, HttpStatus status) {
+        this.response.clear();
         this.response.put(ERROR, messageValue);
         this.response.put(MESSAGE, messageValue);
         return new ResponseEntity<>(this.response, status);

@@ -80,7 +80,7 @@ public class CartService {
                 orderUpdate.setDeliveryDate(dateTime);
                 //marcar como completado el carrito
                 ProcessStatusEntity process = this.processStatusService.existsProcessStatusByProcessStatus("Completado");
-                CartEntity cartUpdate = this.existCart(orderUpdate.getCartId());
+                CartEntity cartUpdate = this.existCart(orderUpdate.getCart().getId());
                 this.updateCart(cartUpdate,process.getId());
                 break;
         }
@@ -102,7 +102,7 @@ public class CartService {
         CartDTO cartResponse = this.convertToCartDTO(cart);
         List<CartItemDTO> items = this.cartItemService.registerCartItems(cartDTO.getItems(),cart);
         cartResponse.setItems(items);
-        OrderDTO orderResponse = this.orderService.registerOrder(orderDTO,cartResponse.getId());
+        OrderDTO orderResponse = this.orderService.registerOrder(orderDTO,cart);
         responseDTO.setOrder(orderResponse);
         responseDTO.setCart(cartResponse);
         return responseDTO;
@@ -161,6 +161,7 @@ public class CartService {
         cartDTO.setStatus(this.processStatusService.processStatus(listProcess,cartEntity.getStatusId()));
         cartDTO.setPaymentMethod(this.paymentMethodService.paymentMethod(listPayment,cartEntity.getPaymentMethodId()));
         cartDTO.setCreatedAt(cartEntity.getCreatedAt());
+        if (cartEntity.getOrder() != null){cartDTO.setOrder(this.orderService.convertToDTO(cartEntity.getOrder()));}
         if (!cartEntity.getCartItems().isEmpty()){
             List<CartItemDTO> listDTO = cartEntity.getCartItems().stream()
                     .map(this.cartItemService::convertToCartItemDTO)

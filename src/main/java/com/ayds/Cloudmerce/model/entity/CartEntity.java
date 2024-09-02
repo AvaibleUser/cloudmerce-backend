@@ -1,6 +1,7 @@
 package com.ayds.Cloudmerce.model.entity;
 
 import com.ayds.Cloudmerce.enums.DeliveryType;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,4 +47,9 @@ public class CartEntity {
     // Relación uno a muchos con CartItemEntity
     @OneToMany(mappedBy = "cart", fetch = FetchType.EAGER)
     private List<CartItemEntity> cartItems = new ArrayList<>();
+
+    // Relación uno a uno con OrderEntity
+    @OneToOne(mappedBy = "cart", fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private OrderEntity order;
 }
