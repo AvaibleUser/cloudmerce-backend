@@ -46,6 +46,14 @@ public class CartService {
         return this.cartRepository.findById(idCart).orElse(null);
     }
 
+    public CartResponseDto getCartById(Integer idCart) {
+        CartEntity cartEntity = this.cartRepository.findById(idCart).orElse(null);
+        if (cartEntity == null) {
+            return new CartResponseDto();
+        }
+        return this.convertToCartDtoResponse(cartEntity);
+    }
+
     public CartDTO updateCart(CartEntity cartUpdate, Integer statusId) {
         cartUpdate.setStatusId(statusId);
         return this.convertToCartDTO(this.cartRepository.save(cartUpdate));
@@ -168,6 +176,9 @@ public class CartService {
         return this.cartRepository.findAllByUserId(userId).orElse(List.of());
     }
 
+    /*
+    * apartado para funciones para agregar filtros a la peticiones
+     */
     private void addFilterProcessSatatus(int processStatus, List<Predicate> predicates, Root<CartEntity> cart,  CriteriaBuilder cb){
         if (processStatus > 0){
             predicates.add(cb.equal(cart.get("statusId"), processStatus));
