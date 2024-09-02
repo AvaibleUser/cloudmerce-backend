@@ -22,6 +22,7 @@ public class CartResponseDto {
     private BigDecimal tax;
     private String paymentMethod;
     private String status;
+    private OrderDTO order;
     private DeliveryType deliveryType;
     private Integer userId;
     private List<CartItemDTO> items;

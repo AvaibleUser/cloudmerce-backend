@@ -1,5 +1,6 @@
 package com.ayds.Cloudmerce.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,8 +28,10 @@ public class OrderEntity {
     @Column(name = "status_id", nullable = false)
     private Integer statusId;
 
-    @Column(name = "cart_id", nullable = false)
-    private Integer cartId;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "cart_id", nullable = false)
+    @JsonBackReference
+    private CartEntity cart;
 
     @Column(name = "order_date", insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime orderDate;

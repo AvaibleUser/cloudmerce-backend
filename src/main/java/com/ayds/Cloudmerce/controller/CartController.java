@@ -23,16 +23,12 @@ public class CartController {
 
     @Autowired
     private CartService cartService;
-
     @Autowired
     private ProcessStatusService processStatusService;
-
     @Autowired
     private PaymentMethodService paymentMethodService;
-
     @Autowired
     private CartResponseService cartResponseService;
-
     @Autowired
     private CartItemService cartItemService;
 
