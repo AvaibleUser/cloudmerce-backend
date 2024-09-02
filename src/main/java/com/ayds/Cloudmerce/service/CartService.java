@@ -168,51 +168,6 @@ public class CartService {
         return this.cartRepository.findAllByUserId(userId).orElse(List.of());
     }
 
-    /**
-     *  funcion para obtener los carritos de un usuario en especifico, con parametros
-     * @param userId el id del usuario
-     * @param size para el maximo de devolucions
-     * @param startDate fecha del inicio para el filtro
-     * @param endDate fecha de final para el rango
-     * @param order asc o desc
-     * @param cartIdInit si se quiere iniciar en un carrito como punto de partida
-     * @return
-     */
-    public List<CartResponseDto> getCartsUserParams(Integer userId, int size, String startDate, String endDate, String order, int cartIdInit, int processStatus, int paymentMethod) {
-        // Crear CriteriaBuilder y CriteriaQuery
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<CartEntity> cq = cb.createQuery(CartEntity.class);
-        Root<CartEntity> cart = cq.from(CartEntity.class);
-
-        // Crear lista de predicados para aplicar filtros
-        List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(cart.get("userId"), userId));
-
-        this.addFilterDate(predicates,cart,startDate,endDate,cb);
-
-        // Aplicar filtro de cartIdInit
-        if (cartIdInit > 0) {
-            predicates.add(cb.greaterThanOrEqualTo(cart.get("id"), cartIdInit));
-        }
-
-        // aplica el filtro de paymethod y processstatus
-        this.addFilterPayMethod(paymentMethod,predicates,cart,cb);
-        this.addFilterProcessSatatus(processStatus,predicates,cart,cb);
-
-        // Aplicar los predicados a la consulta
-        cq.where(cb.and(predicates.toArray(new Predicate[0])));
-
-        this.addFilterOrder(cart,cq,cb,order);
-
-        // Ejecutar la consulta con el tamaño máximo de resultados
-        TypedQuery<CartEntity> query = entityManager.createQuery(cq);
-        query.setMaxResults(size);
-
-        return query.getResultList().stream()
-                .map(this::convertToCartDtoResponse)
-                .collect(Collectors.toList());
-    }
-
     private void addFilterProcessSatatus(int processStatus, List<Predicate> predicates, Root<CartEntity> cart,  CriteriaBuilder cb){
         if (processStatus > 0){
             predicates.add(cb.equal(cart.get("statusId"), processStatus));
@@ -247,4 +202,64 @@ public class CartService {
             predicates.add(cb.lessThanOrEqualTo(cart.get("createdAt").as(LocalDate.class), end));
         }
     }
+
+    private void addFilterUser(List<Predicate> predicates, Root<CartEntity> cart, CriteriaBuilder cb, int userId){
+        if (userId > 0) predicates.add(cb.equal(cart.get("userId"), userId));
+    }
+
+    private void addFilterCartInit(List<Predicate> predicates, Root<CartEntity> cart, CriteriaBuilder cb, int cartIdInit){
+        if (cartIdInit > 0) {
+            predicates.add(cb.greaterThanOrEqualTo(cart.get("id"), cartIdInit));
+        }
+    }
+
+    /**
+     *  funcion para obtener los carritos de un usuario en especifico, con parametros
+     * @param userId el id del usuario
+     * @param size para el maximo de devolucions
+     * @param startDate fecha del inicio para el filtro
+     * @param endDate fecha de final para el rango
+     * @param order asc o desc
+     * @param cartIdInit si se quiere iniciar en un carrito como punto de partida
+     * @return
+     */
+    public List<CartResponseDto> getCartsFilterWithParams(Integer userId, int size, String startDate, String endDate, String order, int cartIdInit, int processStatus, int paymentMethod) {
+        // Crear CriteriaBuilder y CriteriaQuery
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<CartEntity> cq = cb.createQuery(CartEntity.class);
+        Root<CartEntity> cart = cq.from(CartEntity.class);
+
+        // Crear lista de predicados para aplicar filtros
+        List<Predicate> predicates = new ArrayList<>();
+
+        //filtro de usuario
+        this.addFilterUser(predicates,cart,cb,userId);
+
+        //filtro de fechas inicio y final
+        this.addFilterDate(predicates,cart,startDate,endDate,cb);
+
+        // Aplicar filtro de un id de carrito para iniciar la consulta
+        this.addFilterCartInit(predicates,cart,cb,cartIdInit);
+
+        // aplica el filtro de paymethod
+        this.addFilterPayMethod(paymentMethod,predicates,cart,cb);
+
+        // aplica el filtro de processstatus
+        this.addFilterProcessSatatus(processStatus,predicates,cart,cb);
+
+        // Aplicar los predicados a la consulta
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
+        // aplica el orden especifico
+        this.addFilterOrder(cart,cq,cb,order);
+
+        // Ejecutar la consulta con el tamaño máximo de resultados
+        TypedQuery<CartEntity> query = entityManager.createQuery(cq);
+        query.setMaxResults(size);
+
+        return query.getResultList().stream()
+                .map(this::convertToCartDtoResponse)
+                .collect(Collectors.toList());
+    }
+
 }
