@@ -93,4 +93,22 @@ public class CartController {
 
     }
 
+    /*
+     * aparado para peticiones GET con usuario especifico
+     */
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<Object>  getUserCart(@PathVariable("id") Integer id, @RequestParam(value = "size", defaultValue = "12") int size,
+                                                @RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate, @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate,
+                                                @RequestParam(value = "order", defaultValue = "asc") String order, @RequestParam(value = "cartIdInit", defaultValue = "0") int cartIdInit,
+                                                @RequestParam(value = "paymentMethod", defaultValue = "0") int paymentMethod, @RequestParam(value = "processStatus", defaultValue = "0") int processStatus) {
+
+
+        try {
+            List<CartResponseDto> list = this.cartService.getCartsUserParams(id, size, startDate, endDate, order, cartIdInit, processStatus,paymentMethod);
+            return this.cartResponseService.responseSuccess(list,"Lista de  carritos del usuario con id: "+ id, HttpStatus.OK);
+        }catch (Exception e) {
+            return this.cartResponseService.responseError("A ocurrido un error al procesar el Carrito de Compras, Revisa los datos proporcionados, porfavor intentalo de nuevo",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
