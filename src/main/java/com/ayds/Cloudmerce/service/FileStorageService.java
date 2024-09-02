@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.ayds.Cloudmerce.model.exception.BadRequestException;
 
 @Service
 public class FileStorageService {
@@ -23,7 +24,7 @@ public class FileStorageService {
 
     public String store(String filename, MultipartFile file) {
         if (file.isEmpty()) {
-            throw new IllegalArgumentException("The file must have any content.");
+            throw new BadRequestException("The file must have any content.");
         }
 
         ObjectMetadata metadata = new ObjectMetadata();
