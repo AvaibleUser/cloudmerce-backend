@@ -2,11 +2,9 @@ package com.ayds.Cloudmerce.controller;
 
 import com.ayds.Cloudmerce.model.dto.cart.*;
 import com.ayds.Cloudmerce.model.entity.CartEntity;
+import com.ayds.Cloudmerce.model.entity.CartItemEntity;
 import com.ayds.Cloudmerce.model.entity.ProcessStatusEntity;
-import com.ayds.Cloudmerce.service.CartResponseService;
-import com.ayds.Cloudmerce.service.CartService;
-import com.ayds.Cloudmerce.service.PaymentMethodService;
-import com.ayds.Cloudmerce.service.ProcessStatusService;
+import com.ayds.Cloudmerce.service.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.NonNull;
@@ -34,6 +32,9 @@ public class CartController {
 
     @Autowired
     private CartResponseService cartResponseService;
+
+    @Autowired
+    private CartItemService cartItemService;
 
     @GetMapping
     public ResponseEntity<Object> getAllCartsWithItems() {
@@ -91,6 +92,12 @@ public class CartController {
         List<PaymentMethodDTO> paymentMethodRess = this.paymentMethodService.getAllPaymentMethods();
         return this.cartResponseService.responseSuccess(paymentMethodRess,"Lista de metodos de pago que soporta la aplicacion", HttpStatus.OK);
 
+    }
+
+    @GetMapping("/items/{idCart}")
+    public ResponseEntity<Object> getCartItemsById(@Valid  @PathVariable("idCart") @Positive Integer idCart) {
+        List<CartItemDTO> list = this.cartItemService.getAllCartItems(idCart);
+        return this.cartResponseService.responseSuccess(list,"Lista de items del carrito con id: "+ idCart, HttpStatus.OK);
     }
 
     /*

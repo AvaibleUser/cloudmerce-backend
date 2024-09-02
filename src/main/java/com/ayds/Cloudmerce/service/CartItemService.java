@@ -17,7 +17,6 @@ public class CartItemService {
 
     private final CartItemRepository cartItemRepository;
 
-
     public List<CartItemDTO> registerCartItems(List<CartItemDTO> cartItemsDTO, CartEntity cart) {
         // Guardar los elementos y convertir a DTOs
         return cartItemsDTO.stream()
@@ -44,5 +43,10 @@ public class CartItemService {
         cartItemDTO.setCartId(cartItemEntity.getCart().getId());
         cartItemDTO.setId(cartItemEntity.getId());
         return cartItemDTO;
+    }
+
+    public List<CartItemDTO>getAllCartItems(Integer cartId) {
+        return this.cartItemRepository.findAllByCartId(cartId).orElse(List.of())
+                .stream().map(this::convertToCartItemDTO).collect(Collectors.toList());
     }
 }
