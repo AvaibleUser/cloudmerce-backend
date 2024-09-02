@@ -63,7 +63,7 @@ public class ProductEntity {
     private Set<ProductCategoryEntity> productCategories;
 
     @OneToMany(mappedBy = "product", fetch = EAGER)
-    private Set<ProductImageEntity> productImages;
+    private Set<ImageEntity> images;
 
     @OneToMany(mappedBy = "product")
     private Set<ProductNotificationEntity> productNotifications;

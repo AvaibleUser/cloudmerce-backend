@@ -1,11 +1,11 @@
 package com.ayds.Cloudmerce.model.entity;
 
-import java.util.Set;
-
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -26,8 +26,11 @@ public class ImageEntity {
     private Long id;
 
     @NonNull
+    @Column(name = "image_url")
     private String url;
 
-    @OneToMany(mappedBy = "image")
-    private Set<ProductImageEntity> productImages;
+    @NonNull
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private ProductEntity product;
 }

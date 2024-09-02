@@ -18,6 +18,6 @@ public record PagedProductFilteredDto(
         String description,
         @Valid RangeDto<Float> price,
         @PositiveOrZero @With Long stock,
-        ProductState state,
+        @With ProductState state,
         Set<Long> categories) {
 }
