@@ -117,7 +117,7 @@ public class CartController {
     /*
      * aparado para peticiones GET con metodo de pago especifico y filtros
      */
-    @GetMapping("/payment/{idPayMethod}")
+    @GetMapping("/paymentMethods/{idPayMethod}")
     public ResponseEntity<Object>  getPayMethodCart(@PathVariable("idPayMethod") Integer idPayMethod, @RequestParam(value = "size", defaultValue = "12") int size,
                                                     @RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate, @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate,
                                                     @RequestParam(value = "order", defaultValue = "asc") String order, @RequestParam(value = "cartIdInit", defaultValue = "0") int cartIdInit,
@@ -130,6 +130,27 @@ public class CartController {
             }
             List<CartResponseDto> list = this.cartService.getCartsFilterWithParams(0, size, startDate, endDate, order, cartIdInit, processStatus,idPayMethod);
             return this.cartResponseService.responseSuccess(list,"Lista de  carritos con el metodo de pago con id: "+ idPayMethod, HttpStatus.OK);
+        }catch (Exception e) {
+            return this.cartResponseService.responseError("A ocurrido un error al procesar el Carrito de Compras, Revisa los datos proporcionados, porfavor intentalo de nuevo",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /*
+     * aparado para peticiones GET con metodo de estado del proceso y filtros
+     */
+    @GetMapping("/processStatus/{idProcessStatus}")
+    public ResponseEntity<Object>  getProcessStatusCart(@PathVariable("idProcessStatus") Integer idProcessStatus, @RequestParam(value = "size", defaultValue = "12") int size,
+                                                        @RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate, @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate,
+                                                        @RequestParam(value = "order", defaultValue = "asc") String order, @RequestParam(value = "cartIdInit", defaultValue = "0") int cartIdInit,
+                                                        @RequestParam(value = "paymentMethod", defaultValue = "0") int paymentMethod) {
+
+
+        try {
+            if (idProcessStatus <= 0){
+                return this.cartResponseService.responseError("El id del ESTADO DE PROCESO no puede ser menor o igual a CERO",HttpStatus.CONFLICT);
+            }
+            List<CartResponseDto> list = this.cartService.getCartsFilterWithParams(0, size, startDate, endDate, order, cartIdInit, idProcessStatus,paymentMethod);
+            return this.cartResponseService.responseSuccess(list,"Lista de  carritos con el metodo de pago con id: "+ idProcessStatus, HttpStatus.OK);
         }catch (Exception e) {
             return this.cartResponseService.responseError("A ocurrido un error al procesar el Carrito de Compras, Revisa los datos proporcionados, porfavor intentalo de nuevo",HttpStatus.INTERNAL_SERVER_ERROR);
         }
