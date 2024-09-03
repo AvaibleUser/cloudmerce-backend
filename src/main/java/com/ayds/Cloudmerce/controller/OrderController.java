@@ -76,4 +76,38 @@ public class OrderController {
             return this.cartResponseService.responseError("A ocurrido un error al procesar la ORDEN, Revisa los datos proporcionados, porfavor intentalo de nuevo",HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/paymentMethods/{id}")
+    public ResponseEntity<Object> getOrdersPayMethods(@PathVariable("id") Integer id, @RequestParam(value = "size", defaultValue = "12") int size,
+                                                @RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate, @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate,
+                                                @RequestParam(value = "order", defaultValue = "asc") String order, @RequestParam(value = "orderIdInit", defaultValue = "0") int orderIdInit, @RequestParam(value = "processStatus", defaultValue = "0") int processStatus,
+                                                @RequestParam(value = "dateFilter", defaultValue = "orderDate") String dateFilter) {
+        try {
+            if (id <= 0){
+                return this.cartResponseService.responseError("El id del usuario no puede ser menor o igual a CERO",HttpStatus.CONFLICT);
+            }
+            List<OrderResponseDto> list = this.orderService.getOrdersFilterWithParams(0, size, startDate, endDate, order, orderIdInit, processStatus,dateFilter,id);
+            return cartResponseService.responseSuccess(list,"Lista de todas las ORDENES con con el metodo de pago con id "+id , HttpStatus.OK);
+        }catch (Exception e){
+            return this.cartResponseService.responseError("A ocurrido un error al procesar la ORDEN, Revisa los datos proporcionados, porfavor intentalo de nuevo",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/processStatus/{id}")
+    public ResponseEntity<Object> getOrdersProcessStatus(@PathVariable("id") Integer id, @RequestParam(value = "size", defaultValue = "12") int size,
+                                                      @RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate, @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate,
+                                                      @RequestParam(value = "order", defaultValue = "asc") String order, @RequestParam(value = "orderIdInit", defaultValue = "0") int orderIdInit, @RequestParam(value = "paymentMethod", defaultValue = "0") int paymentMethod,
+                                                      @RequestParam(value = "dateFilter", defaultValue = "orderDate") String dateFilter) {
+        try {
+            if (id <= 0){
+                return this.cartResponseService.responseError("El id del usuario no puede ser menor o igual a CERO",HttpStatus.CONFLICT);
+            }
+            List<OrderResponseDto> list = this.orderService.getOrdersFilterWithParams(0, size, startDate, endDate, order, orderIdInit, id,dateFilter,paymentMethod);
+            return cartResponseService.responseSuccess(list,"Lista de todas las ORDENES con con el estado de proceso con id: "+id , HttpStatus.OK);
+        }catch (Exception e){
+            return this.cartResponseService.responseError("A ocurrido un error al procesar la ORDEN, Revisa los datos proporcionados, porfavor intentalo de nuevo",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 }

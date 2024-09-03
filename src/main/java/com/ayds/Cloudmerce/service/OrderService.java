@@ -125,10 +125,10 @@ public class OrderService {
      */
 
     private void addFilterPayMethod(int paymentMethod, List<Predicate> predicates, Root<OrderEntity> orderEnti,  CriteriaBuilder cb){
-        if (paymentMethod > 0){
-            Join<OrderEntity, CartEntity> cartJoin = orderEnti.join("cart");
-            predicates.add(cb.equal(cartJoin.get("paymentMethodId"), paymentMethod));
-        }
+        //if (paymentMethod > 0){
+          //  Join<OrderEntity, CartEntity> cartJoin = orderEnti.join("cart");
+           // predicates.add(cb.equal(cartJoin.get("paymentMethodId"), paymentMethod));
+        //}
     }
 
     private void addFilterProcessSatatus(int processStatus, List<Predicate> predicates, Root<OrderEntity> cart,  CriteriaBuilder cb){
