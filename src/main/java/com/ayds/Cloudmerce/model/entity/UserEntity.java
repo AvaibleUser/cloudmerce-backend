@@ -50,7 +50,7 @@ public class UserEntity {
 
 
     @Column(name = "payment_preference_id")
-    private Integer paymentPreferenceId;  //TODO pendiente de agregar la entidad como llave foranea
+    private PaymentMethodEntity paymentPreferenceId;  //TODO pendiente de agregar la entidad como llave foranea
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -2,6 +2,7 @@ package com.ayds.Cloudmerce.service;
 
 import com.ayds.Cloudmerce.mapper.UserMapper;
 import com.ayds.Cloudmerce.model.dto.NewUserDto;
+import com.ayds.Cloudmerce.model.entity.PaymentMethodEntity;
 import com.ayds.Cloudmerce.model.entity.RoleEntity;
 import com.ayds.Cloudmerce.model.entity.UserEntity;
 import com.ayds.Cloudmerce.repository.UserRepository;
@@ -21,6 +22,8 @@ public class UserService {
 
     private final RoleService roleService;
 
+    private final PaymentMethodService paymentMethodService;
+
     private final EncryptoUtils encryptoUtils;
 
     public void saveUser(NewUserDto newUserDto){
@@ -30,8 +33,8 @@ public class UserService {
         //buscamos el rol
         RoleEntity role = roleService.findRoleById(newUserDto.getRoleId());
         user.setRole(role);
-        //TODO buscar el metodo de preferencia de pago
-        user.setPaymentPreferenceId(newUserDto.getPaymentPreferenceId());
+        PaymentMethodEntity paymentMethodEntity = paymentMethodService.finById(newUserDto.getPaymentPreferenceId());
+        user.setPaymentPreferenceId(paymentMethodEntity);
         userRepository.save(user);
     }
 
