@@ -39,7 +39,7 @@ public class CartEntity {
     private Integer statusId;
 
     @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    private Long userId;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

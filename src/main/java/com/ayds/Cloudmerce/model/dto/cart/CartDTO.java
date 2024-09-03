@@ -30,7 +30,7 @@ public class CartDTO {
     @NonNull
     private DeliveryType deliveryType;
     @NonNull @Positive
-    private Integer userId;
+    private Long userId;
     @NotEmpty
     private List<CartItemDTO> items;
     private LocalDateTime createdAt;

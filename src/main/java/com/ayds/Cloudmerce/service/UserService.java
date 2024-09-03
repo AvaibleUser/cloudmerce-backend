@@ -53,6 +53,10 @@ public class UserService {
                                 .toList());
     }
 
+    public Optional<UserDto> findUserById(Long userId) {
+        return userRepository.findById(userId).map(UserService::toUserDto);
+    }
+
     public Optional<UserDto> findUserByEmail(String email) {
         return userRepository.findByEmail(email).map(UserService::toUserDto);
     }
