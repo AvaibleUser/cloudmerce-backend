@@ -16,6 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.ayds.Cloudmerce.config.filter.AuthFilter;
@@ -26,24 +29,27 @@ import com.ayds.Cloudmerce.service.UserService;
 public class AuthConfig {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, AuthFilter authFilter) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, AuthFilter authFilter,
+            CorsConfigurationSource corsConfigurationSource) throws Exception {
         return httpSecurity
-                .cors(cors -> cors.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(POST, "/api/auth/**").permitAll()
-                        .requestMatchers(GET, "/api/sales/**").permitAll()
-                        .requestMatchers(POST, "/api/sales/**").permitAll()
-                        .requestMatchers(PUT, "/api/sales/**").permitAll()
-                        .requestMatchers(DELETE, "/api/sales/**").permitAll()
-                        .requestMatchers(GET, "/api/admin").hasRole("ADMIN")
-                        .requestMatchers(POST, "/api/admin").hasRole("ADMIN")
-                        .requestMatchers(PUT, "/api/admin").hasRole("ADMIN")
-                        .requestMatchers(DELETE, "/api/admin").hasRole("ADMIN")
-                        .anyRequest().authenticated())
+                        .requestMatchers(GET, "/api/**").permitAll()
+                        .requestMatchers(POST, "/api/**").permitAll()
+                        .requestMatchers(PUT, "/api/**").permitAll()
+                        .requestMatchers(DELETE, "/api/**").permitAll())
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration().applyPermitDefaultValues();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     @Bean
