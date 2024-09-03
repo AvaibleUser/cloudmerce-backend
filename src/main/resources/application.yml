@@ -5,7 +5,7 @@ spring:
   datasource:
     username: ${DB_USER}
     password: ${DB_PASS}
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    url: jdbc:postgresql://${DB_HOST}/${DB_DATABASE}
 
   jpa:
     show-sql: true
@@ -22,3 +22,10 @@ security:
     token:
       secret-key: ${JWT_SECRET}
       expiration-time-min: 1440
+
+aws:
+  accessKey: ${AWS_ACCESS_KEY}
+  secretKey: ${AWS_SECRET_KEY}
+  s3:
+    region: region
+    bucketName: bucket
