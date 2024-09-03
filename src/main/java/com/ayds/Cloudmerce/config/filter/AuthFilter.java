@@ -34,8 +34,8 @@ public class AuthFilter extends OncePerRequestFilter {
 
         if (token != null) {
             String id = tokenService.validateToken(token);
-            UserEntity user = userRepository.findById(Integer.parseInt(id));
-            var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            UserEntity user = userRepository.findById(Integer.parseInt(id)).get();
+            var authentication = new UsernamePasswordAuthenticationToken(user, null);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 

@@ -1,73 +1,58 @@
 package com.ayds.Cloudmerce.model.entity;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.ayds.Cloudmerce.enums.UserRole;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
-@Table
-@Entity(name = "users")
+@Table(name = "control_user.user")
+@Entity(name = "user")
 @Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class UserEntity implements UserDetails {
+public class UserEntity {
 
     @Id
-    @GeneratedValue
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
 
-    private String username;
+    @Column(name = "name")
+    private String name;
 
-    private String password;
+    @Column(name = "email")
+    private String email;
 
-    private String nombre;
+    @Column(name = "address")
+    private String address;
 
-    private String correo;
-
-    private String direccion;
-
+    @Column(name = "nit")
     private String nit;
 
-    //TODO agregar la entidad ROL como atributo
-    //TODO agregar la entidad PREFERENCIA PAGO como atributo
+    @Column(name = "password")
+    private String password;
+
+    @JoinColumn(name = "role_id::integer", referencedColumnName = "id")
+    @Lazy
+    @ManyToOne
+    private RoleEntity role;
 
 
+    @Column(name = "payment_preference_id")
+    private Integer paymentPreferenceId;  //TODO pendiente de agregar la entidad como llave foranea
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
-
-    public UserEntity(String username, String password, UserRole role) {
-        this.username = username;
-        this.password = password;
-        this.role = role;
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        switch (role) {
-            case ADMIN:
-                return List.of(
-                        new SimpleGrantedAuthority("ROLE_ADMIN"),
-                        new SimpleGrantedAuthority("ROLE_NO_ADMIN"));
-
-            default:
-                return List.of(new SimpleGrantedAuthority("ROLE_NO_ADMIN"));
-        }
-    }
 }
