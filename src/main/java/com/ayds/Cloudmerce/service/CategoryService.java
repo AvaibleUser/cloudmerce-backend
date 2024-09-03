@@ -10,6 +10,7 @@ import com.ayds.Cloudmerce.model.dto.CategoryDto;
 import com.ayds.Cloudmerce.model.dto.CategoryRegisterDto;
 import com.ayds.Cloudmerce.model.dto.CategoryUpdateDto;
 import com.ayds.Cloudmerce.model.entity.CategoryEntity;
+import com.ayds.Cloudmerce.model.exception.RequestConflictException;
 import com.ayds.Cloudmerce.repository.CategoryRepository;
 
 @Service
@@ -49,7 +50,7 @@ public class CategoryService {
     public void deleteCategory(long categoryId) {
         CategoryEntity dbCategory = categoryRepository.findById(categoryId).get();
         if (!ObjectUtils.isEmpty(dbCategory.getProductCategories())) {
-            throw new IllegalArgumentException("The category can't be deleted because have products associated");
+            throw new RequestConflictException("The category can't be deleted because have products associated");
         }
         categoryRepository.deleteById(categoryId);
     }

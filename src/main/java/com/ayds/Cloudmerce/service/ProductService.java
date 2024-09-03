@@ -22,11 +22,15 @@ import com.ayds.Cloudmerce.model.dto.ProductDto;
 import com.ayds.Cloudmerce.model.dto.ProductRegisterDto;
 import com.ayds.Cloudmerce.model.dto.ProductUpdateDto;
 import com.ayds.Cloudmerce.model.entity.CategoryEntity;
+import com.ayds.Cloudmerce.model.entity.ImageEntity;
 // import com.ayds.Cloudmerce.model.entity.ImageEntity;
 import com.ayds.Cloudmerce.model.entity.ProductCategoryEntity;
 import com.ayds.Cloudmerce.model.entity.ProductEntity;
+import com.ayds.Cloudmerce.model.exception.BadRequestException;
+import com.ayds.Cloudmerce.model.exception.ValueNotFoundException;
 // import com.ayds.Cloudmerce.model.entity.ProductImageEntity;
 import com.ayds.Cloudmerce.repository.CategoryRepository;
+import com.ayds.Cloudmerce.repository.ImageRepository;
 // import com.ayds.Cloudmerce.repository.ImageRepository;
 import com.ayds.Cloudmerce.repository.ProductCategoryRepository;
 // import com.ayds.Cloudmerce.repository.ProductImageRepository;
@@ -48,25 +52,27 @@ public class ProductService {
     @Autowired
     private ProductCategoryRepository productCategoryRepository;
 
-    // @Autowired
-    // private ImageRepository imageRepository;
+    @Autowired
+    private ImageRepository imageRepository;
 
-    // @Autowired
-    // private ProductImageRepository productImageRepository;
-
-    private static ProductDto toProductDto(ProductEntity product, Collection<CategoryEntity> categories) {
+    private static ProductDto toProductDto(ProductEntity product, Collection<CategoryEntity> categories,
+            Collection<ImageEntity> images) {
         return new ProductDto(product.getId(), product.getName(), product.getDescription(),
                 product.getPrice(), product.getStock(), product.getState(), product.getCreationAt(),
                 categories.stream()
                         .map(CategoryEntity::getName)
                         .toList(),
-                List.of());
+                images.stream()
+                        .map(ImageEntity::getUrl)
+                        .toList());
     }
 
     private static ProductDto toProductDto(ProductEntity product) {
-        return toProductDto(product, product.getProductCategories()
-                .stream()
-                .map(ProductCategoryEntity::getCategory).toList());
+        return toProductDto(product,
+                product.getProductCategories()
+                        .stream()
+                        .map(ProductCategoryEntity::getCategory).toList(),
+                product.getImages());
     }
 
     public Optional<ProductDto> findProduct(long productId) {
@@ -97,7 +103,7 @@ public class ProductService {
         if (filters.stock() != null) {
             addFilter.apply(productSpecification.byStockGreaterThanOrEqualTo(filters.stock()));
         }
-        if (filters.state() != null) {
+        if (filters.state() != null && filters.state() != ProductState.DELETED) {
             addFilter.apply(productSpecification.byState(filters.state()));
         }
 
@@ -122,16 +128,9 @@ public class ProductService {
 
         if (ObjectUtils.isEmpty(categories) || product.categories().size() != categories.size()) {
             int diff = Math.abs(product.categories().size() - categories.size());
-            throw new IllegalArgumentException("There are " + diff + " categories not found");
+            throw new ValueNotFoundException("There are " + diff + " categories not found");
         }
 
-        // List<ImageEntity> images = imageRepository.saveAll(imageUrls.stream()
-        // .map(ImageEntity::new)
-        // .toList());
-
-        // if (ObjectUtils.isEmpty(images)) {
-        // throw new IllegalArgumentException("At least one image is needed");
-        // }
         ProductEntity newProduct = productRepository.saveAndFlush(new ProductEntity(
                 product.name(), product.description(), product.price(), product.stock()));
 
@@ -139,11 +138,14 @@ public class ProductService {
                 .map(category -> new ProductCategoryEntity(category, newProduct))
                 .toList());
 
-        // productImageRepository.saveAll(images.stream()
-        // .map(image -> new ProductImageEntity(image, newProduct))
-        // .toList());
+        List<ImageEntity> images = List.of();
+        if (!ObjectUtils.isEmpty(imageUrls)) { // TODO: cambiar por un error si no trae imagenes
+            images = imageRepository.saveAll(imageUrls.stream()
+                    .map(imageUrl -> new ImageEntity(imageUrl, newProduct))
+                    .toList());
+        }
 
-        return toProductDto(newProduct, categories);
+        return toProductDto(newProduct, categories, images);
     }
 
     @Transactional
@@ -167,7 +169,7 @@ public class ProductService {
         }
         if (product.categories() != null) {
             if (product.categories().isEmpty()) {
-                throw new IllegalArgumentException("The product must have at least one category");
+                throw new BadRequestException("The product must have at least one category");
             }
             Collection<ProductCategoryEntity> productCategoriesRemoved = productCategoryRepository
                     .findByProductIdAndCategoryIdNotIn(dbProduct.getId(), product.categories())
@@ -187,7 +189,7 @@ public class ProductService {
 
             if (ObjectUtils.isEmpty(categories) || product.categories().size() != categories.size()) {
                 int diff = Math.abs(product.categories().size() - categories.size());
-                throw new IllegalArgumentException("There are " + diff + " categories not found");
+                throw new ValueNotFoundException("There are " + diff + " categories not found");
             }
 
             List<ProductCategoryEntity> productCategories = productCategoryRepository.saveAll(categories.stream()
@@ -198,10 +200,9 @@ public class ProductService {
         }
         // if (product.imageUrls() != null) {
         // if (product.imageUrls().isEmpty()) {
-        // throw new IllegalArgumentException("The product must have at least one
-        // category");
+        // throw new BadRequestException("The product must have at least one image");
         // }
-        // Set<CategoryEntity> categories =
+        // List<CategoryEntity> categories =
         // categoryRepository.findAllByCategory(product.imageUrls());
         // dbProduct.setCategories(categories);
         // }
