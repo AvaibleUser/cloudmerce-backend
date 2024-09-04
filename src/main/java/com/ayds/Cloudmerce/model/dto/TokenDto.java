@@ -1,5 +1,7 @@
 package com.ayds.Cloudmerce.model.dto;
 
+import lombok.NonNull;
+
 public record TokenDto(
-        String accessToken) {
+        @NonNull String accessToken) {
 }

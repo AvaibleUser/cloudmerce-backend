@@ -1,9 +1,15 @@
 package com.ayds.Cloudmerce.model.dto;
 
-import com.ayds.Cloudmerce.enums.UserRole;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public record SignUpDto(
-        String username,
-        String password,
-        UserRole role) {
+        @NotBlank String name,
+        @NotBlank String email,
+        @NotBlank String address,
+        @NotBlank String nit,
+        @NotBlank String password,
+        @Positive @NotNull Long roleId,
+        @Positive @NotNull Long paymentPreferenceId) {
 }

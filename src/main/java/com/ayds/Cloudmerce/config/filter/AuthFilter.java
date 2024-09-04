@@ -30,11 +30,11 @@ public class AuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String token = this.recoverToken(request);
+        String token = recoverToken(request);
 
         if (token != null) {
-            String id = tokenService.validateToken(token);
-            UserEntity user = userRepository.findById(Integer.parseInt(id)).get();
+            String id = tokenService.getIdFromToken(token);
+            UserEntity user = userRepository.findById(Long.parseLong(id)).orElseThrow();
             var authentication = new UsernamePasswordAuthenticationToken(user, null);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

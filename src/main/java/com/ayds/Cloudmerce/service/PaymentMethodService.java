@@ -1,21 +1,20 @@
 package com.ayds.Cloudmerce.service;
 
-import com.ayds.Cloudmerce.model.entity.PaymentMethodEntity;
-import com.ayds.Cloudmerce.repository.PaymentMethodRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ayds.Cloudmerce.model.entity.PaymentMethodEntity;
+import com.ayds.Cloudmerce.repository.PaymentMethodRepository;
+
 @Service
-@RequiredArgsConstructor
 public class PaymentMethodService {
 
-    private final PaymentMethodRepository paymentMethodRepository;
+    @Autowired
+    private PaymentMethodRepository paymentMethodRepository;
 
-
-    public PaymentMethodEntity finById(Integer id){
-        return paymentMethodRepository.findById(id).get();
+    public Optional<PaymentMethodEntity> finById(long id) {
+        return paymentMethodRepository.findById(id);
     }
-
-
-
 }

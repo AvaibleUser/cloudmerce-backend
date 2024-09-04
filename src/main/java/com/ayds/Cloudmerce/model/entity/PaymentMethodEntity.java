@@ -1,21 +1,30 @@
 package com.ayds.Cloudmerce.model.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
+@Entity
 @Table(name = "payment_method", schema = "sales_control")
-@Entity(name = "payment_method")
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class PaymentMethodEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
+    @NonNull
     @Column(name = "method_name")
-    private String methodName;
-
+    private String name;
 }

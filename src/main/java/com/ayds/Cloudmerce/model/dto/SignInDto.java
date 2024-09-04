@@ -1,6 +1,8 @@
 package com.ayds.Cloudmerce.model.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record SignInDto(
-        String email,
-        String password) {
+        @NotBlank String email,
+        @NotBlank String password) {
 }

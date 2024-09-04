@@ -1,35 +1,39 @@
 package com.ayds.Cloudmerce.model.entity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.context.annotation.Lazy;
-
-@Table(name = "user_permission",schema = "user_control")
-@Entity(name = "user_permission")
+@Entity
+@Table(name = "user_permission", schema = "user_control")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class UserPermissionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
+    private Long id;
 
-
-    @JoinColumn(name = "user_id::integer", referencedColumnName = "id")
-    @Lazy
+    @NonNull
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private UserEntity user;
 
-
-
-    @Column(name = "permission_id::integer")
-    private Integer permissionId;
-
-
-
+    @NonNull
+    @ManyToOne
+    @JoinColumn(name = "permission_id")
+    private PermissionEntity permission;
 }

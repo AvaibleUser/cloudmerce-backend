@@ -1,28 +1,25 @@
 package com.ayds.Cloudmerce.service;
 
-import com.ayds.Cloudmerce.model.entity.RoleEntity;
-import com.ayds.Cloudmerce.repository.RoleRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import com.ayds.Cloudmerce.model.entity.RoleEntity;
+import com.ayds.Cloudmerce.repository.RoleRepository;
 
 @Service
-@RequiredArgsConstructor
 public class RoleService {
 
-    private final RoleRepository roleRepository;
+    @Autowired
+    private RoleRepository roleRepository;
 
-    public RoleEntity findRoleById(int id){
-        RoleEntity roleEntity = roleRepository.findById(id).get();
-        return roleEntity;
+    public Optional<RoleEntity> findRoleById(long id) {
+        return roleRepository.findById(id);
     }
 
-    public ArrayList<RoleEntity> finAllroles(){
-        ArrayList<RoleEntity> roles = (ArrayList<RoleEntity>)roleRepository.findAll();
-        return roles;
+    public List<RoleEntity> findAllRoles() {
+        return roleRepository.findAll();
     }
-
-
-
 }
