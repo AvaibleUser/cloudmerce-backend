@@ -50,6 +50,9 @@ public class UserEntity {
     @NonNull
     private String password;
 
+    @NonNull
+    private String googleAuthKey;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private Instant createdAt;

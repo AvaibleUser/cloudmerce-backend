@@ -21,19 +21,29 @@ public class TokenService {
     @Value("${security.jwt.token.expiration-time-min}")
     private long expirationTimeMin;
 
+    private int tempExpirationTimeMin = 5;
+
     @Autowired
     private Algorithm algorithm;
 
-    public TokenDto generateAccessToken(UserDto user) {
+    private TokenDto generateAccessToken(UserDto user, long minutes) {
         try {
             return new TokenDto(JWT.create()
                     .withSubject(String.valueOf(user.id()))
                     .withClaim("email", user.email())
-                    .withExpiresAt(genAccessExpirationDate())
+                    .withExpiresAt(genAccessExpirationDate(minutes))
                     .sign(algorithm));
         } catch (JWTCreationException exception) {
             throw new JWTCreationException("Error while generating token", exception);
         }
+    }
+
+    public TokenDto generateAccessToken(UserDto user) {
+        return generateAccessToken(user, expirationTimeMin);
+    }
+
+    public TokenDto generateTemporalAccessToken(UserDto user) {
+        return generateAccessToken(user, tempExpirationTimeMin);
     }
 
     public String getIdFromToken(String token) {
@@ -47,9 +57,9 @@ public class TokenService {
         }
     }
 
-    private Instant genAccessExpirationDate() {
+    private Instant genAccessExpirationDate(long minutes) {
         return LocalDateTime.now()
-                .plusMinutes(expirationTimeMin)
+                .plusMinutes(minutes)
                 .toInstant(ZoneOffset.of("-06:00"));
     }
 }
