@@ -1,5 +1,7 @@
 package com.ayds.Cloudmerce.controller;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ayds.Cloudmerce.model.dto.SignInDto;
 import com.ayds.Cloudmerce.model.dto.SignUpDto;
 import com.ayds.Cloudmerce.model.dto.TokenDto;
-import com.ayds.Cloudmerce.model.entity.UserEntity;
-import com.ayds.Cloudmerce.service.AuthService;
+import com.ayds.Cloudmerce.model.dto.UserDto;
 import com.ayds.Cloudmerce.service.TokenService;
+import com.ayds.Cloudmerce.service.UserService;
 
 import jakarta.validation.Valid;
 
@@ -24,7 +26,7 @@ import jakarta.validation.Valid;
 public class AuthController {
 
     @Autowired
-    private AuthService authService;
+    private UserService authService;
 
     @Autowired
     private TokenService tokenService;
@@ -33,16 +35,19 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @PostMapping("/sign-up")
-    public ResponseEntity<?> signUp(@RequestBody @Valid SignUpDto user) {
-        authService.registerUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<UserDto> signUp(@RequestBody @Valid SignUpDto user) {
+        UserDto dbUser = authService.registerUser(user);
+        return new ResponseEntity<>(dbUser, HttpStatus.CREATED);
     }
 
     @PostMapping("/sign-in")
     public ResponseEntity<TokenDto> signIn(@RequestBody @Valid SignInDto user) {
-        var authenticableUser = new UsernamePasswordAuthenticationToken(user.username(), user.password());
-        UserEntity authUser = (UserEntity) authenticationManager.authenticate(authenticableUser).getPrincipal();
-        String accessToken = tokenService.generateAccessToken(authUser);
-        return ResponseEntity.ok(new TokenDto(accessToken));
+        var authenticableUser = new UsernamePasswordAuthenticationToken(user.email(), user.password());
+        authenticationManager.authenticate(authenticableUser);
+
+        Optional<TokenDto> token = authService.findUserByEmail(user.email())
+                .map(tokenService::generateAccessToken);
+
+        return ResponseEntity.of(token);
     }
 }

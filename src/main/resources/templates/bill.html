@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        width: 80%;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .logo {
+        max-width: 200px;
+        margin-bottom: 10px;
+      }
+      .company-info,
+      .client-info {
+        margin-bottom: 20px;
+      }
+      .invoice-details {
+        margin-bottom: 20px;
+      }
+      .invoice-details table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .invoice-details th,
+      .invoice-details td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      .total {
+        font-weight: bold;
+        text-align: right;
+      }
+      .legal-info {
+        margin-top: 30px;
+        font-size: 12px;
+        color: #777;
+      }
+    </style>
+    <title>Factura</title>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Información de la Empresa -->
+      <div class="header">
+        <img th:src="@{${company.logoPath}}" alt="Logo Empresa" class="logo" />
+        <h1 th:text="${company.name}">Nombre de la Empresa</h1>
+        <p th:text="${company.address}">Dirección de la Empresa</p>
+        <p th:text="${company.phone}">Teléfono</p>
+        <p th:text="${company.email}">Correo Electrónico</p>
+      </div>
+
+      <!-- Información de la Factura -->
+      <div class="invoice-info">
+        <h2>Factura</h2>
+        <p>
+          <strong>Número de Factura:</strong>
+          <span th:text="${bill.id}">0001</span>
+        </p>
+        <p>
+          <strong>Fecha:</strong>
+          <span th:text="${bill.order_date}">01/01/2024</span>
+        </p>
+        <!-- <p th:if="${bill.shippingCode}">
+          <strong>Número de Pedido:</strong>
+          <span th:text="${bill.shippingCode}">123456</span>
+        </p> -->
+      </div>
+
+      <!-- Información del Cliente -->
+      <div class="client-info">
+        <h2>Factura a:</h2>
+        <p>
+          <strong>Nombre:</strong>
+          <span th:text="${client.name}">Nombre del Cliente</span>
+        </p>
+        <p>
+          <strong>NIT:</strong>
+          <span th:text="${client.nit}">NIT del Cliente</span>
+        </p>
+      </div>
+
+      <!-- Detalles de la Factura -->
+      <div class="invoice-details">
+        <h2>Detalles de la Factura</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="item : ${cartItems}">
+              <td th:text="${item.product.name}">Nombre del Producto</td>
+              <td th:text="${item.quantity}">1</td>
+              <td th:text="${item.product.price}">$0.00</td>
+              <td th:text="${item.subTotal}">$0.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Totales -->
+      <div class="totals">
+        <p>
+          <strong>Subtotal:</strong> <span th:text="${cart.total}">$0.00</span>
+        </p>
+        <p th:if="${bill.shippingCost}">
+          <strong>Costos de Envío:</strong>
+          <span th:text="${bill.shippingCost}">$0.00</span>
+        </p>
+        <p>
+          <strong>Impuestos:</strong> <span th:text="${cart.tax}">$0.00</span>
+        </p>
+        <p>
+          <strong>Total:</strong> <span th:text="${bill.total + cart.tax}">$0.00</span>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

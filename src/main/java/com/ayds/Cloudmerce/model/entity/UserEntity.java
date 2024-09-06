@@ -1,58 +1,69 @@
 package com.ayds.Cloudmerce.model.entity;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.time.Instant;
+import java.util.Set;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.hibernate.annotations.CreationTimestamp;
 
-import com.ayds.Cloudmerce.enums.UserRole;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-@Table(name = "control_user.user")
-@Entity(name = "user")
+@Entity
+@Table(name = "user", schema = "user_control")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
+    private Long id;
 
-    @Column(name = "name")
+    @NonNull
     private String name;
 
-    @Column(name = "email")
+    @NonNull
     private String email;
 
-    @Column(name = "address")
+    @NonNull
     private String address;
 
-    @Column(name = "nit")
+    @NonNull
     private String nit;
 
-    @Column(name = "password")
+    @NonNull
     private String password;
 
-    @JoinColumn(name = "role_id::integer", referencedColumnName = "id")
-    @Lazy
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private Instant createdAt;
+
+    @NonNull
     @ManyToOne
+    @JoinColumn(name = "role_id")
     private RoleEntity role;
 
+    @NonNull
+    @ManyToOne
+    @JoinColumn(name = "payment_preference_id")
+    private PaymentMethodEntity paymentPreference;
 
-    @Column(name = "payment_preference_id")
-    private Integer paymentPreferenceId;  //TODO pendiente de agregar la entidad como llave foranea
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    private Set<UserPermissionEntity> userPermissions;
 }

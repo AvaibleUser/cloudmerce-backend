@@ -12,22 +12,28 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @Entity
-@Table(name = "permission", schema = "user_control")
+@Table(name = "company_settings", schema = "company_control")
 @Getter
 @NoArgsConstructor
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class PermissionEntity {
+public class CompanyEntity {
 
     @Id
     @GeneratedValue
     private Long id;
 
     @NonNull
-    @Column(name = "permission_name")
     private String name;
 
     @NonNull
-    @Column(name = "priority_level")
-    private Long priorityLevel;
+    private String address;
+
+    @NonNull
+    @Column(name = "delivery_cost")
+    private Float shippingCost;
+
+    @NonNull
+    @Column(name = "logo_path")
+    private String logoPath;
 }

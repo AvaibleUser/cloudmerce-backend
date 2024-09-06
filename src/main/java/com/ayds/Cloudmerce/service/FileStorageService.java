@@ -1,6 +1,7 @@
 package com.ayds.Cloudmerce.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,24 +23,27 @@ public class FileStorageService {
     @Value("${aws.s3.bucketName}")
     private String bucketName;
 
+    public String store(String filename, InputStream inputStream, String contentType, long contentLength) {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentType(contentType);
+        metadata.setContentLength(contentLength);
+
+        PutObjectRequest s3PutRequest = new PutObjectRequest(bucketName, filename, inputStream, metadata);
+        s3Client.putObject(s3PutRequest);
+
+        return loadUrl(filename);
+    }
+
     public String store(String filename, MultipartFile file) {
         if (file.isEmpty()) {
             throw new BadRequestException("The file must have any content.");
         }
 
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType(file.getContentType());
-        metadata.setContentLength(file.getSize());
-
-        PutObjectRequest s3PutRequest;
         try {
-            s3PutRequest = new PutObjectRequest(bucketName, filename, file.getInputStream(), metadata);
+            return store(filename, file.getInputStream(), file.getContentType(), file.getSize());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        s3Client.putObject(s3PutRequest);
-
-        return loadUrl(filename);
     }
 
     public String store(MultipartFile file) {

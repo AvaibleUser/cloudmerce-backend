@@ -1,21 +1,25 @@
 package com.ayds.Cloudmerce.service;
 
-import com.ayds.Cloudmerce.model.dto.cart.PaymentMethodDTO;
-import com.ayds.Cloudmerce.model.dto.cart.ProcessStatusDTO;
-import com.ayds.Cloudmerce.model.entity.PaymentMethodEntity;
-import com.ayds.Cloudmerce.model.entity.ProcessStatusEntity;
-import com.ayds.Cloudmerce.repository.PaymentMethodRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.ayds.Cloudmerce.model.dto.cart.PaymentMethodDTO;
+import com.ayds.Cloudmerce.model.entity.PaymentMethodEntity;
+import com.ayds.Cloudmerce.repository.PaymentMethodRepository;
+
 @Service
-@RequiredArgsConstructor
 public class PaymentMethodService {
 
-    private final PaymentMethodRepository paymentMethodRepository;
+    @Autowired
+    private PaymentMethodRepository paymentMethodRepository;
+
+    public Optional<PaymentMethodEntity> finById(long id) {
+        return paymentMethodRepository.findById(id);
+    }
 
     public List<PaymentMethodDTO> getAllPaymentMethods() {
         return this.paymentMethodRepository.findAll().stream()
@@ -23,22 +27,22 @@ public class PaymentMethodService {
                 .collect(Collectors.toList());
     }
 
-    public PaymentMethodEntity getPaymentMethodById(Integer id) {
+    public PaymentMethodEntity getPaymentMethodById(Long id) {
         return this.paymentMethodRepository.findById(id).orElse(null);
     }
 
     private PaymentMethodDTO convertPaymentMethodDTO(PaymentMethodEntity paymentMethodEntity) {
-        return new PaymentMethodDTO(paymentMethodEntity.getId(), paymentMethodEntity.getMethodName());
+        return new PaymentMethodDTO(paymentMethodEntity.getId(), paymentMethodEntity.getName());
     }
 
     public List<PaymentMethodEntity> getAllPaymentMethodsEntity() {
         return this.paymentMethodRepository.findAll();
     }
 
-    public String paymentMethod(List<PaymentMethodEntity> lis, Integer id){
+    public String paymentMethod(List<PaymentMethodEntity> lis, Long id) {
         for (PaymentMethodEntity paymentMethodEntity : lis) {
             if (paymentMethodEntity.getId().equals(id)) {
-                return paymentMethodEntity.getMethodName();
+                return paymentMethodEntity.getName();
             }
         }
         return null;

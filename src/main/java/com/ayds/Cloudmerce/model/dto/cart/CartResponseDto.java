@@ -24,7 +24,7 @@ public class CartResponseDto {
     private String status;
     private OrderDTO order;
     private DeliveryType deliveryType;
-    private Integer userId;
+    private Long userId;
     private List<CartItemDTO> items;
     private LocalDateTime createdAt;
 }

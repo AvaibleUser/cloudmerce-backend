@@ -24,13 +24,13 @@ public class CartDTO {
     @NonNull @Positive
     private BigDecimal tax;
     @NonNull @Positive
-    private Integer paymentMethodId;
+    private Long paymentMethodId;
     @NonNull @Positive
     private Integer statusId;
     @NonNull
     private DeliveryType deliveryType;
     @NonNull @Positive
-    private Integer userId;
+    private Long userId;
     @NotEmpty
     private List<CartItemDTO> items;
     private LocalDateTime createdAt;
