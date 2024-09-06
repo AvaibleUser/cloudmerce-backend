@@ -12,5 +12,6 @@ public record ProductRegisterDto(
         @NotBlank String description,
         @NotNull @PositiveOrZero Float price,
         @NotNull @PositiveOrZero Long stock,
-        @NotEmpty Set<Long> categories) {
+        Set<Long> categoryIds,
+        Set<@NotEmpty String> categories) {
 }

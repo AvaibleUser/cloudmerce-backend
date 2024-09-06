@@ -124,7 +124,13 @@ public class ProductService {
 
     @Transactional
     public ProductDto saveProduct(ProductRegisterDto product, Collection<String> imageUrls) {
-        List<CategoryEntity> categories = categoryRepository.findAllById(product.categories());
+        if (ObjectUtils.isEmpty(product.categories()) && ObjectUtils.isEmpty(product.categoryIds())) {
+            throw new BadRequestException("Se deben de asignar al menos una categoria al producto");
+        }
+
+        List<CategoryEntity> categories = !ObjectUtils.isEmpty(product.categoryIds())
+                ? categoryRepository.findAllById(product.categoryIds())
+                : categoryRepository.findAllByNameIn(product.categories());
 
         if (ObjectUtils.isEmpty(categories) || product.categories().size() != categories.size()) {
             int diff = Math.abs(product.categories().size() - categories.size());
