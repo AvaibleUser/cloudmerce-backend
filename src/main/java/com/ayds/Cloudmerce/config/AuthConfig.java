@@ -39,7 +39,8 @@ public class AuthConfig {
                         .requestMatchers(GET, "/api/**").permitAll()
                         .requestMatchers(POST, "/api/**").permitAll()
                         .requestMatchers(PUT, "/api/**").permitAll()
-                        .requestMatchers(DELETE, "/api/**").permitAll())
+                        .requestMatchers(DELETE, "/api/**").permitAll()
+                        .anyRequest().permitAll())
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
