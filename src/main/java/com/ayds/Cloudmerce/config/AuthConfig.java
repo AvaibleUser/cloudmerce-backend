@@ -36,7 +36,7 @@ public class AuthConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, AuthFilter authFilter,
             CorsConfigurationSource corsConfigurationSource) throws Exception {
         return httpSecurity
-                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
