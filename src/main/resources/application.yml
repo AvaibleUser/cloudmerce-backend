@@ -8,15 +8,34 @@ spring:
     url: jdbc:postgresql://${DB_HOST}/${DB_DATABASE}
 
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: update
 
     open-in-view: false
 
+  mail:
+    host: smtp.example.com
+    port: 587
+    username: ${EMAIL_ADDRESS}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 server:
   port: 8080
   error:
     include-binding-errors: always
+
+security:
+  jwt:
+    token:
+      secret-key: ${JWT_SECRET}
+      expiration-time-min: 1440
 
 aws:
   accessKey: ${AWS_ACCESS_KEY}
