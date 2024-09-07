@@ -30,23 +30,15 @@ public class AuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String token = recoverToken(request);
+        String token = tokenService.recoverToken(request);
 
         if (token != null) {
-            String id = tokenService.getIdFromToken(token);
-            UserEntity user = userRepository.findById(Long.parseLong(id)).orElseThrow();
+            long id = tokenService.getIdFromToken(token);
+            UserEntity user = userRepository.findById(id).orElseThrow();
             var authentication = new UsernamePasswordAuthenticationToken(user, null);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private String recoverToken(HttpServletRequest request) {
-        var authHeader = request.getHeader("Authorization");
-        if (authHeader == null) {
-            return null;
-        }
-        return authHeader.replace("Bearer ", "");
     }
 }
