@@ -5,6 +5,7 @@ import java.util.Set;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 public record ProductRegisterDto(
@@ -12,5 +13,6 @@ public record ProductRegisterDto(
         @NotBlank String description,
         @NotNull @PositiveOrZero Float price,
         @NotNull @PositiveOrZero Long stock,
-        @NotEmpty Set<Long> categories) {
+        Set<@Positive @NotNull Long> categoryIds,
+        Set<@NotEmpty String> categories) {
 }
