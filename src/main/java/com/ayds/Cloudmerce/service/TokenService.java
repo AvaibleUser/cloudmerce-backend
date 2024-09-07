@@ -12,8 +12,8 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.ayds.Cloudmerce.model.dto.TokenDto;
-import com.ayds.Cloudmerce.model.dto.UserDto;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class TokenService {
@@ -26,32 +26,37 @@ public class TokenService {
     @Autowired
     private Algorithm algorithm;
 
-    private TokenDto generateAccessToken(UserDto user, long minutes) {
+    private String generateAccessToken(long id, long minutes) {
         try {
-            return new TokenDto(JWT.create()
-                    .withSubject(String.valueOf(user.id()))
-                    .withClaim("email", user.email())
+            return JWT.create()
+                    .withSubject(String.valueOf(id))
                     .withExpiresAt(genAccessExpirationDate(minutes))
-                    .sign(algorithm));
+                    .sign(algorithm);
         } catch (JWTCreationException exception) {
             throw new JWTCreationException("Error while generating token", exception);
         }
     }
 
-    public TokenDto generateAccessToken(UserDto user) {
-        return generateAccessToken(user, expirationTimeMin);
+    public String generateAccessToken(long id) {
+        return generateAccessToken(id, expirationTimeMin);
     }
 
-    public TokenDto generateTemporalAccessToken(UserDto user) {
-        return generateAccessToken(user, tempExpirationTimeMin);
+    public String generateTemporalAccessToken(long id) {
+        return generateAccessToken(id, tempExpirationTimeMin);
     }
 
-    public String getIdFromToken(String token) {
+    public long getIdFromToken(HttpServletRequest request) {
+        return getIdFromToken(recoverToken(request));
+    }
+
+    public long getIdFromToken(String token) {
         try {
-            return JWT.require(algorithm)
+            String id = JWT.require(algorithm)
                     .build()
                     .verify(token)
                     .getSubject();
+
+            return Long.parseLong(id);
         } catch (JWTVerificationException exception) {
             throw new JWTVerificationException("Error while validating token", exception);
         }
@@ -61,5 +66,13 @@ public class TokenService {
         return LocalDateTime.now()
                 .plusMinutes(minutes)
                 .toInstant(ZoneOffset.of("-06:00"));
+    }
+
+    public String recoverToken(HttpServletRequest request) {
+        var authHeader = request.getHeader("Authorization");
+        if (authHeader == null) {
+            return null;
+        }
+        return authHeader.replace("Bearer ", "");
     }
 }

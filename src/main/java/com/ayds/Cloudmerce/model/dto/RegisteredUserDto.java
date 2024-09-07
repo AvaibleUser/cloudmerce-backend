@@ -9,10 +9,8 @@ public record RegisteredUserDto(
         String email,
         String address,
         String nit,
-        String googleAuthKey,
         Instant createdAt,
         String role,
-        String authQrUrl,
         String paymentMethod,
         List<String> permissions) {
 }

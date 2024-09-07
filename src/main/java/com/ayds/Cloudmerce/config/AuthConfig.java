@@ -25,6 +25,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.auth0.jwt.algorithms.Algorithm;
 import com.ayds.Cloudmerce.config.filter.AuthFilter;
+import com.ayds.Cloudmerce.service.AuthenticationManagerService;
 import com.ayds.Cloudmerce.service.UserService;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 
@@ -60,7 +61,7 @@ public class AuthConfig {
 
     @Bean
     AuthenticationManager authenticationManager(UserService userService) {
-        return authUser -> userService.authenticateUser(authUser);
+        return new AuthenticationManagerService();
     }
 
     @Bean

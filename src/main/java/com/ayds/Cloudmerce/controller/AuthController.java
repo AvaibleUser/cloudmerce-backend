@@ -8,25 +8,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ayds.Cloudmerce.model.dto.RecoverPasswordConfirmationDto;
 import com.ayds.Cloudmerce.model.dto.RecoverPasswordDto;
-import com.ayds.Cloudmerce.model.dto.RegisteredUserDto;
 import com.ayds.Cloudmerce.model.dto.SignIn2faDto;
 import com.ayds.Cloudmerce.model.dto.SignInDto;
 import com.ayds.Cloudmerce.model.dto.SignUpConfirmationDto;
 import com.ayds.Cloudmerce.model.dto.SignUpDto;
 import com.ayds.Cloudmerce.model.dto.TokenDto;
 import com.ayds.Cloudmerce.model.dto.UserDto;
+import com.ayds.Cloudmerce.model.dto.UserWithGoogleSecretDto;
+import com.ayds.Cloudmerce.model.exception.BadRequestException;
+import com.ayds.Cloudmerce.model.exception.FailedAuthenticateException;
 import com.ayds.Cloudmerce.model.exception.RequestConflictException;
 import com.ayds.Cloudmerce.model.exception.ValueNotFoundException;
 import com.ayds.Cloudmerce.service.AuthConfirmationService;
 import com.ayds.Cloudmerce.service.EmailService;
+import com.ayds.Cloudmerce.service.GoogleAuthService;
 import com.ayds.Cloudmerce.service.TemplateRendererService;
 import com.ayds.Cloudmerce.service.TokenService;
 import com.ayds.Cloudmerce.service.UserService;
@@ -40,6 +43,9 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private GoogleAuthService googleAuthService;
 
     @Autowired
     private AuthConfirmationService authConfirmationService;
@@ -56,9 +62,21 @@ public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    private TokenDto addTokenToUserData(String token, UserWithGoogleSecretDto user) {
+        return new TokenDto(token, user.id(), user.name(), user.email(), user.email(), user.paymentMethod());
+    }
+
+    private TokenDto addAccessTokenToUserData(UserWithGoogleSecretDto user) {
+        return addTokenToUserData(tokenService.generateAccessToken(user.id()), user);
+    }
+
+    private TokenDto addTemporalTokenToUserData(UserWithGoogleSecretDto user) {
+        return addTokenToUserData(tokenService.generateTemporalAccessToken(user.id()), user);
+    }
+
     @PostMapping("/sign-up")
-    public ResponseEntity<RegisteredUserDto> signUp(@RequestBody @Valid SignUpDto user) {
-        RegisteredUserDto dbUser = userService.registerUser(user);
+    public ResponseEntity<UserDto> signUp(@RequestBody @Valid SignUpDto user) {
+        UserDto dbUser = userService.registerUser(user);
 
         String code = authConfirmationService.generateEmailConfirmationCode(dbUser.email());
 
@@ -76,13 +94,19 @@ public class AuthController {
         return new ResponseEntity<>(dbUser, HttpStatus.CREATED);
     }
 
-    @GetMapping("/sign-up/confirm")
-    public ResponseEntity<String> confirmSignUp(@Valid SignUpConfirmationDto user) {
+    @PutMapping("/sign-up")
+    public ResponseEntity<TokenDto> confirmSignUp(@Valid SignUpConfirmationDto user) {
         boolean confirmed = authConfirmationService.confirmUserEmailCode(user.email(), user.code());
 
-        return confirmed
-                ? ResponseEntity.ok("La cuenta ha sido confirmada, puede cerrar esta ventana")
-                : ResponseEntity.unprocessableEntity().body("La cuenta no se pudo confirmar");
+        if (!confirmed) {
+            throw new FailedAuthenticateException("No se pudo confirmar la cuenta");
+        }
+
+        TokenDto token = userService.findUserWithGoogleKeyByEmail(user.email())
+                .map(this::addAccessTokenToUserData)
+                .orElseThrow(() -> new InsufficientAuthenticationException("No se encontro el registro del usuario"));
+
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("/sign-in")
@@ -90,23 +114,32 @@ public class AuthController {
         var authenticableUser = new UsernamePasswordAuthenticationToken(user.email(), user.password());
         authenticationManager.authenticate(authenticableUser);
 
-        return ResponseEntity.accepted().build();
+        return userService.findUserWithGoogleKeyByEmail(user.email())
+                .filter(dbUser -> dbUser.googleAuthKey() == null)
+                .map(this::addAccessTokenToUserData)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.accepted().build());
     }
 
     @PostMapping("/sign-in/2fa")
     public ResponseEntity<TokenDto> signIn2fa(@RequestBody @Valid SignIn2faDto user) {
-        TokenDto token = userService.logInUserByEmailAndCode(user.email(), user.code())
-                .map(tokenService::generateAccessToken)
-                .orElseThrow(() -> new InsufficientAuthenticationException("La autenticacion en dos factores fallo"));
+        UserWithGoogleSecretDto user2fa = userService.findUserWithGoogleKeyByEmail(user.email())
+                .orElseThrow(() -> new ValueNotFoundException("No se pudo encontrar el registro del usuario"));
 
-        return ResponseEntity.ok(token);
+        if (user2fa.googleAuthKey() == null) {
+            throw new BadRequestException("El usuario debe de tener activada la autenticacion por dos factores");
+        }
+        if (!googleAuthService.authencateUserWithGoogleAuth(user2fa.googleAuthKey(), user.code())) {
+            throw new InsufficientAuthenticationException("La autenticacion en dos factores fallo");
+        }
+
+        return ResponseEntity.ok(addAccessTokenToUserData(user2fa));
     }
 
     @PostMapping("/recover-password")
     public ResponseEntity<?> recoverPassword(@RequestBody @Valid RecoverPasswordDto user) {
         UserDto dbUser = userService.findUserByEmail(user.email())
-                .orElseThrow(
-                        () -> new ValueNotFoundException("No se encontro un usuario con el email " + user.email()));
+                .orElseThrow(() -> new ValueNotFoundException("No se pudo encontrar el registro del usuario"));
 
         String code = authConfirmationService.generateEmailConfirmationCode(dbUser.email());
 
@@ -124,7 +157,7 @@ public class AuthController {
         return ResponseEntity.accepted().build();
     }
 
-    @GetMapping("/recover-password/confirm")
+    @PutMapping("/recover-password")
     public ResponseEntity<TokenDto> confirmSignUp(@Valid RecoverPasswordConfirmationDto user) {
         boolean confirmed = authConfirmationService.confirmUserEmailCode(user.email(), user.code());
 
@@ -132,8 +165,8 @@ public class AuthController {
             throw new RequestConflictException("No se logro confirmar el cambio de contraseña");
         }
 
-        TokenDto token = userService.findUserByEmail(user.email())
-                .map(tokenService::generateTemporalAccessToken)
+        TokenDto token = userService.findUserWithGoogleKeyByEmail(user.email())
+                .map(this::addTemporalTokenToUserData)
                 .get();
 
         return ResponseEntity.ok(token);

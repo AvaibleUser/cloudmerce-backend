@@ -10,6 +10,7 @@ public record UserDto(
         String address,
         String nit,
         Instant createdAt,
+        Boolean hasMultiFactorAuth,
         String role,
         String paymentMethod,
         List<String> permissions) {
