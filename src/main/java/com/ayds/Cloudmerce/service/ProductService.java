@@ -134,7 +134,7 @@ public class ProductService {
 
         if (ObjectUtils.isEmpty(categories) || product.categories().size() != categories.size()) {
             int diff = Math.abs(product.categories().size() - categories.size());
-            throw new ValueNotFoundException("There are " + diff + " categories not found");
+            throw new ValueNotFoundException("Hay " + diff + " categorias que no se encontraron");
         }
 
         ProductEntity newProduct = productRepository.saveAndFlush(new ProductEntity(
@@ -173,16 +173,27 @@ public class ProductService {
         if (product.state() != null && product.state() != ProductState.DELETED) {
             dbProduct.setState(product.state());
         }
-        if (product.categories() != null) {
-            if (product.categories().isEmpty()) {
+        if (product.categoryIds() != null || product.categoryIds() != null) {
+            if (product.categories().isEmpty() && product.categoryIds().isEmpty()) {
                 throw new BadRequestException("The product must have at least one category");
             }
-            Collection<ProductCategoryEntity> productCategoriesRemoved = productCategoryRepository
-                    .findByProductIdAndCategoryIdNotIn(dbProduct.getId(), product.categories())
+            boolean useIds = !ObjectUtils.isEmpty(product.categoryIds());
+            Collection<ProductCategoryEntity> productCategoriesRemoved = useIds
+                    ? productCategoryRepository.findByProductIdAndCategoryIdNotIn(dbProduct.getId(),
+                            product.categoryIds())
+                    : productCategoryRepository.findByProductIdAndCategoryNameNotIn(dbProduct.getId(),
+                            product.categories());
+
+            productCategoriesRemoved = productCategoriesRemoved
                     .stream()
                     .filter(category -> {
-                        if (product.categories().contains(category.getCategory().getId())) {
-                            product.categories().remove(category.getCategory().getId());
+                        if (useIds) {
+                            if (product.categoryIds().contains(category.getCategory().getId())) {
+                                product.categoryIds().remove(category.getCategory().getId());
+                                return false;
+                            }
+                        } else if (product.categories().contains(category.getCategory().getName())) {
+                            product.categories().remove(category.getCategory().getName());
                             return false;
                         }
                         return true;
@@ -191,7 +202,9 @@ public class ProductService {
 
             productCategoryRepository.deleteAll(productCategoriesRemoved);
 
-            List<CategoryEntity> categories = categoryRepository.findAllById(product.categories());
+            List<CategoryEntity> categories = useIds
+                    ? categoryRepository.findAllById(product.categoryIds())
+                    : categoryRepository.findAllByNameIn(product.categories());
 
             if (ObjectUtils.isEmpty(categories) || product.categories().size() != categories.size()) {
                 int diff = Math.abs(product.categories().size() - categories.size());

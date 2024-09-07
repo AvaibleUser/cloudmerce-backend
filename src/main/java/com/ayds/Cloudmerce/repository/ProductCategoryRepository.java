@@ -11,4 +11,6 @@ import com.ayds.Cloudmerce.model.entity.ProductCategoryEntity;
 public interface ProductCategoryRepository extends JpaRepository<ProductCategoryEntity, Long> {
 
     Set<ProductCategoryEntity> findByProductIdAndCategoryIdNotIn(Long productId, Iterable<Long> categoryIds);
+
+    Set<ProductCategoryEntity> findByProductIdAndCategoryNameNotIn(Long productId, Iterable<String> categoryNames);
 }
