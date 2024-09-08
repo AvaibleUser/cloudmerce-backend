@@ -29,6 +29,7 @@ spring:
 server:
   port: 8080
   error:
+    include-message: always
     include-binding-errors: always
 
 security:
@@ -41,5 +42,5 @@ aws:
   accessKey: ${AWS_ACCESS_KEY}
   secretKey: ${AWS_SECRET_KEY}
   s3:
-    region: us-east-2
-    bucketName: ecommerce-ayd
+    region: us-east-1
+    bucketName: ecommerce-ayds
