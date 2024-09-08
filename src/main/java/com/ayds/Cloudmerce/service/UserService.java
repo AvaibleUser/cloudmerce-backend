@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ayds.Cloudmerce.model.dto.SignUpDto;
+import com.ayds.Cloudmerce.model.dto.UserChangeDto;
 import com.ayds.Cloudmerce.model.dto.UserDto;
 import com.ayds.Cloudmerce.model.dto.UserWithGoogleSecretDto;
 import com.ayds.Cloudmerce.model.entity.PaymentMethodEntity;
@@ -80,6 +81,24 @@ public class UserService {
         user.setPassword(encryptedPassword);
 
         return toUserForGoogleAuth(userRepository.save(user));
+    }
+
+    @Transactional
+    public UserWithGoogleSecretDto changeUserInfo(Long userId, UserChangeDto user) {
+        UserEntity dbUser = userRepository.findById(userId).get();
+
+        user.address().ifPresent(dbUser::setAddress);
+
+        user.paymentMethod().map(paymentMethodRepository::findByName).ifPresent(dbUser::setPaymentPreference);
+
+        user.currentPassword()
+                .filter(passwd -> user.newPassword().isPresent())
+                .filter(passwd -> encoder.matches(passwd, dbUser.getPassword()))
+                .flatMap(passwd -> user.newPassword())
+                .map(encoder::encode)
+                .ifPresent(dbUser::setPassword);
+
+        return toUserForGoogleAuth(dbUser);
     }
 
     @Transactional
