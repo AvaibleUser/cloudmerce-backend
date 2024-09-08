@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,7 +95,7 @@ public class UserService {
     @Transactional
     public UserDto registerUser(SignUpDto user) {
         if (userRepository.existsByEmail(user.email())) {
-            throw new DuplicateKeyException("El email que se intenta registrar ya esta en uso");
+            throw new BadRequestException("El email que se intenta registrar ya esta en uso");
         }
         String encryptedPassword = encoder.encode(user.password());
 

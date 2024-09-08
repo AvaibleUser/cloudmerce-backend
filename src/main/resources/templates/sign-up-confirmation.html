@@ -24,8 +24,9 @@
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         text-align: center;
-        width: 100%;
+        width: 500px;
         max-width: 500px;
+        min-width: 500px;
       }
       h1,
       h2 {
@@ -35,15 +36,12 @@
         color: #94e2d5;
       }
       .code-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        margin-top: 20px;
+        margin: 10px 20px;
       }
       .code {
         background-color: #181825;
         padding: 10px 20px;
+        margin: 10px 10px;
         border-radius: 4px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
@@ -61,8 +59,10 @@
         <span class="important" th:text="${user.name}">Lorem</span>, para
         finalizar el registro de tu cuenta, introduce el siguiente código:
       </h2>
-      <div class="code-container" th:each="code : ${codeChars}">
-        <span class="important code" th:text="${code}">0</span>
+      <div class="code-container">
+        <br>
+        <span class="important code" th:text="${code[0]}">0</span><span class="important code" th:text="${code[1]}">0</span><span class="important code" th:text="${code[2]}">0</span><span class="important code" th:text="${code[3]}">0</span><span class="important code" th:text="${code[4]}">0</span><span class="important code" th:text="${code[5]}">0</span>
+        <br>
       </div>
     </div>
   </body>

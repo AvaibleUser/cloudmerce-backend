@@ -80,7 +80,7 @@ public class AuthController {
 
         String code = authConfirmationService.generateEmailConfirmationCode(dbUser.email());
 
-        Map<String, Object> templateVariables = Map.of("codeChars", code.toCharArray(), "user", dbUser);
+        Map<String, Object> templateVariables = Map.of("code", code.toCharArray(), "user", dbUser);
 
         String confirmationHtml = templateRendererService.renderTemplate("sign-up-confirmation", templateVariables);
 
@@ -143,7 +143,7 @@ public class AuthController {
 
         String code = authConfirmationService.generateEmailConfirmationCode(dbUser.email());
 
-        Map<String, Object> templateVariables = Map.of("codeChars", code.toCharArray(), "user", dbUser);
+        Map<String, Object> templateVariables = Map.of("code", code.toCharArray(), "user", dbUser);
 
         String confirmationHtml = templateRendererService.renderTemplate("recover-password", templateVariables);
 
