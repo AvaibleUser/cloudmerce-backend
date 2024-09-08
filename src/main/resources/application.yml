@@ -41,5 +41,5 @@ aws:
   accessKey: ${AWS_ACCESS_KEY}
   secretKey: ${AWS_SECRET_KEY}
   s3:
-    region: region
-    bucketName: bucket
+    region: us-east-2
+    bucketName: ecommerce-ayd
