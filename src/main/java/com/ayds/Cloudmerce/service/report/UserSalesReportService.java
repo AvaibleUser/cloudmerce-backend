@@ -54,8 +54,8 @@ public class UserSalesReportService {
                 .where(cb.and(predicates.toArray(new Predicate[0])))
                 .groupBy(cart.get("userId"))
                 .orderBy(order.equalsIgnoreCase("desc")
-                        ? cb.desc(cb.sum(cart.get("id")))
-                        : cb.asc(cb.sum(cart.get("id"))));
+                        ? cb.desc(cb.sum(cart.get("total")))
+                        : cb.asc(cb.sum(cart.get("total"))));
 
         // Ejecutar consulta
         List<Object[]> users = entityManager.createQuery(cq).setMaxResults(size).getResultList();
