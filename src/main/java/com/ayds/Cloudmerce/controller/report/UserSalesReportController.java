@@ -27,11 +27,7 @@ public class UserSalesReportController {
     @Autowired
     private UserSalesReportService userSalesReportService;
 
-    @Autowired
-    private TemplateRendererService templateRendererService;
-
-    @Autowired
-    private PdfGeneratorService pdfService;
+    private  DownloadPdfService downloadPdfService;
 
     @GetMapping("/more")
     public ResponseEntity<Object>  getReportUserMoreShopping(@RequestParam(value = "size", defaultValue = "12") int size,
@@ -68,7 +64,6 @@ public class UserSalesReportController {
 
     @GetMapping("/downloadPDF")
     public ResponseEntity<Resource> downloadReport(@RequestBody UserSalesReportPdf userSalesReportPdf) {
-        System.out.println(userSalesReportPdf);
         Map<String, Object> templateVariables = Map.of(
                 "users", userSalesReportPdf.userSalesReportDto().users(),
                 "totalPurchases", userSalesReportPdf.userSalesReportDto().totalPurchases(),
@@ -80,25 +75,7 @@ public class UserSalesReportController {
                 "status", userSalesReportPdf.processStatus(),
                 "size", userSalesReportPdf.size()
         );
-        String billHtml = templateRendererService.renderTemplate("userSalesReport", templateVariables);
-        try {
-            byte[] pdfBytes = pdfService.generatePdfFromHtmlString(billHtml);
-
-            ByteArrayResource resource = new ByteArrayResource(pdfBytes);
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .contentLength(resource.contentLength())
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            ContentDisposition.attachment()
-                                    .filename("pdf-test.pdf")
-                                    .build()
-                                    .toString())
-                    .body(resource);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            return ResponseEntity.badRequest().build();
-        }
+        return this.downloadPdfService.downloadPdf("userSalesReport", templateVariables);
     }
 
 
