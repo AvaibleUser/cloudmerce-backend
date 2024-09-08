@@ -14,7 +14,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ayds.Cloudmerce.model.entity.PermissionEntity;
@@ -22,7 +21,6 @@ import com.ayds.Cloudmerce.model.entity.UserEntity;
 import com.ayds.Cloudmerce.model.entity.UserPermissionEntity;
 import com.ayds.Cloudmerce.repository.UserRepository;
 
-@Service
 public class AuthenticationManagerService implements AuthenticationManager {
 
     @Autowired
