@@ -63,7 +63,7 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     private TokenDto addTokenToUserData(String token, UserWithGoogleSecretDto user) {
-        return new TokenDto(token, user.id(), user.name(), user.email(), user.email(), user.paymentMethod());
+        return new TokenDto(token, user.id(), user.name(), user.email(), user.role(), user.paymentMethod());
     }
 
     private TokenDto addAccessTokenToUserData(UserWithGoogleSecretDto user) {
@@ -80,7 +80,7 @@ public class AuthController {
 
         String code = authConfirmationService.generateEmailConfirmationCode(dbUser.email());
 
-        Map<String, Object> templateVariables = Map.of("code", code, "user", dbUser);
+        Map<String, Object> templateVariables = Map.of("code", code.toCharArray(), "user", dbUser);
 
         String confirmationHtml = templateRendererService.renderTemplate("sign-up-confirmation", templateVariables);
 
@@ -95,7 +95,7 @@ public class AuthController {
     }
 
     @PutMapping("/sign-up")
-    public ResponseEntity<TokenDto> confirmSignUp(@Valid SignUpConfirmationDto user) {
+    public ResponseEntity<TokenDto> confirmSignUp(@RequestBody @Valid SignUpConfirmationDto user) {
         boolean confirmed = authConfirmationService.confirmUserEmailCode(user.email(), user.code());
 
         if (!confirmed) {
@@ -143,7 +143,7 @@ public class AuthController {
 
         String code = authConfirmationService.generateEmailConfirmationCode(dbUser.email());
 
-        Map<String, Object> templateVariables = Map.of("code", code, "user", dbUser);
+        Map<String, Object> templateVariables = Map.of("code", code.toCharArray(), "user", dbUser);
 
         String confirmationHtml = templateRendererService.renderTemplate("recover-password", templateVariables);
 

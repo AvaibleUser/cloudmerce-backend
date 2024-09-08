@@ -69,7 +69,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDto changeUserPassword(Long userId, String password, String repeatedPassword) {
+    public UserWithGoogleSecretDto changeUserPassword(Long userId, String password, String repeatedPassword) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ValueNotFoundException("No se pudo encontrar los registros del usuario"));
 
@@ -80,7 +80,7 @@ public class UserService {
 
         user.setPassword(encryptedPassword);
 
-        return toUserDto(userRepository.save(user));
+        return toUserForGoogleAuth(userRepository.save(user));
     }
 
     @Transactional
