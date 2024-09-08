@@ -80,7 +80,7 @@ public class AuthController {
 
         String code = authConfirmationService.generateEmailConfirmationCode(dbUser.email());
 
-        Map<String, Object> templateVariables = Map.of("code", code.toCharArray(), "user", dbUser);
+        Map<String, Object> templateVariables = Map.of("codeChars", code.toCharArray(), "user", dbUser);
 
         String confirmationHtml = templateRendererService.renderTemplate("sign-up-confirmation", templateVariables);
 
@@ -143,7 +143,7 @@ public class AuthController {
 
         String code = authConfirmationService.generateEmailConfirmationCode(dbUser.email());
 
-        Map<String, Object> templateVariables = Map.of("code", code.toCharArray(), "user", dbUser);
+        Map<String, Object> templateVariables = Map.of("codeChars", code.toCharArray(), "user", dbUser);
 
         String confirmationHtml = templateRendererService.renderTemplate("recover-password", templateVariables);
 
@@ -158,7 +158,7 @@ public class AuthController {
     }
 
     @PutMapping("/recover-password")
-    public ResponseEntity<TokenDto> confirmSignUp(@Valid RecoverPasswordConfirmationDto user) {
+    public ResponseEntity<TokenDto> confirmSignUp(@RequestBody @Valid RecoverPasswordConfirmationDto user) {
         boolean confirmed = authConfirmationService.confirmUserEmailCode(user.email(), user.code());
 
         if (!confirmed) {

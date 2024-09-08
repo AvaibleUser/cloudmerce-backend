@@ -20,7 +20,7 @@ import com.ayds.Cloudmerce.service.ProductService;
 import jakarta.validation.constraints.Positive;
 
 @RestController
-@RequestMapping("/api/product/{productId}/images")
+@RequestMapping("/api/products/{productId}/images")
 public class ImageController {
 
     @Autowired
