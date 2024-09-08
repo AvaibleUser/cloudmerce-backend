@@ -129,7 +129,7 @@
             <h3>Detalles del Reporte</h3>
             <p><strong>Fecha del reporte:</strong> <span th:text="${dateReport}">--</span> </p>
             <p><strong>Tipo Reporte: </strong><span th:text="${typeReport}">--</span></p>
-            <p><strong>Tipo Criterio: </strong>Total gastado</p>
+            <p><strong>Tipo Criterio: </strong>Total Vendido (Q)</p>
             <p><strong>Periodo:</strong> <span th:text="${rangeDate}">---</span> </p>
         </div>
 
@@ -147,21 +147,21 @@
     <table>
         <thead>
         <tr>
-            <th>Cliente</th>
-            <th>NIT</th>
-            <th>Cantidad Compras</th>
-            <th>Total Gastado</th>
+            <th>Producto</th>
+            <th>Precio Unitario</th>
+            <th>Cantidad Comprada</th>
+            <th>Total</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="item : ${users}">
+        <tr th:each="item : ${products}">
             <td th:text="${item.name}">Cliente A</td>
-            <td th:text="${item.nit}">50</td>
+            <td th:text="${item.price}">50</td>
             <td th:text="${item.totalPurchases}">10</td>
             <td th:text="Q +${item.totalSpent}">Q 500.00</td>
         </tr>
         <tr>
-            <th colspan="2">Total Ventas</th>
+            <th colspan="2">Total De Productos Vendidos</th>
             <th th:text="${totalPurchases}">0</th>
             <th></th>
         </tr>

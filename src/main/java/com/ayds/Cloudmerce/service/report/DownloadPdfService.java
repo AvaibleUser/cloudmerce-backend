@@ -1,4 +1,4 @@
-package com.ayds.Cloudmerce.controller.report;
+package com.ayds.Cloudmerce.service.report;
 
 import com.ayds.Cloudmerce.service.PdfGeneratorService;
 import com.ayds.Cloudmerce.service.TemplateRendererService;

@@ -3,18 +3,13 @@ package com.ayds.Cloudmerce.controller.report;
 import com.ayds.Cloudmerce.model.dto.report.UserSalesReportDto;
 import com.ayds.Cloudmerce.model.dto.report.UserSalesReportPdf;
 import com.ayds.Cloudmerce.service.CartResponseService;
-import com.ayds.Cloudmerce.service.CartService;
-import com.ayds.Cloudmerce.service.PdfGeneratorService;
-import com.ayds.Cloudmerce.service.TemplateRendererService;
+import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.UserSalesReportService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,7 +22,8 @@ public class UserSalesReportController {
     @Autowired
     private UserSalesReportService userSalesReportService;
 
-    private  DownloadPdfService downloadPdfService;
+    @Autowired
+    private DownloadPdfService downloadPdfService;
 
     @GetMapping("/more")
     public ResponseEntity<Object>  getReportUserMoreShopping(@RequestParam(value = "size", defaultValue = "12") int size,
