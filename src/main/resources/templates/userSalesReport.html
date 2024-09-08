@@ -117,9 +117,8 @@
     <!-- Encabezado del reporte -->
     <div class="header">
         <div class="left">
-            <h1>Reporte de Ventas: <span>Usuarios con mas compras</span></h1>
-            <h2>Compañía XYZ S.A.</h2>
-            <p>Fecha del Reporte: 06 de Septiembre, 2024</p>
+            <h1>Reporte de Ventas </h1>
+            <h2>Nombre de la compania</h2>
         </div>
         <img src="https://dca.gob.gt/noticias-guatemala-diario-centro-america/wp-content/uploads/2023/12/Nota-1.1.jpg" alt="Logo de la Empresa" />
     </div>
@@ -127,18 +126,18 @@
     <!-- Información de la empresa y del reporte -->
     <div class="report-info">
         <div class="company-info">
-            <h3>Datos de la Empresa</h3>
-            <p><strong>Nombre:</strong> Compañía XYZ S.A.</p>
-            <p><strong>Dirección:</strong> Calle Falsa 123, Ciudad, País</p>
-            <p><strong>Teléfono:</strong> +123 456 7890</p>
-            <p><strong>Email:</strong> contacto@xyzsa.com</p>
+            <h3>Detalles del Reporte</h3>
+            <p><strong>Fecha del reporte:</strong> <span th:text="${dateReport}">--</span> </p>
+            <p><strong>Tipo Reporte: </strong>Clientes con <span th:text="${typeReport}">--</span> Compras</p>
+            <p><strong>Tipo Criterio: </strong>Total gastado</p>
+            <p><strong>Periodo:</strong> <span th:text="${rangeDate}">---</span> </p>
         </div>
 
         <div class="report-details">
-            <h3>Detalles del Reporte</h3>
-            <p><strong>Fecha:</strong> 06 de Septiembre, 2024</p>
-            <p><strong>Generado por:</strong> Sistema de Reportes XYZ</p>
-            <p><strong>Periodo:</strong> 01 de Septiembre, 2024 - 06 de Septiembre, 2024</p>
+            <h3>Filtros Aplicados</h3>
+            <p><strong>Metodo de pago:</strong> <span th:text="${payMethod}">---</span></p>
+            <p><strong>Estado :</strong> <span th:text="${status}">---</span></p>
+            <p><strong>Cantidad :</strong> <span th:text="${size}">---</span></p>
         </div>
 
         <div class="clearfix"></div>
@@ -148,41 +147,34 @@
     <table>
         <thead>
         <tr>
-            <th>Producto</th>
-            <th>Cantidad Vendida</th>
-            <th>Precio Unitario</th>
-            <th>Total</th>
+            <th>Cliente</th>
+            <th>NIT</th>
+            <th>Cantidad Compras</th>
+            <th>Total Gastado</th>
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td>Producto A</td>
-            <td>50</td>
-            <td>$10.00</td>
-            <td>$500.00</td>
+        <tr th:each="item : ${users}">
+            <td th:text="${item.name}">Cliente A</td>
+            <td th:text="${item.nit}">50</td>
+            <td th:text="${item.totalPurchases}">10</td>
+            <td th:text="Q +${item.totalSpent}">Q 500.00</td>
         </tr>
         <tr>
-            <td>Producto B</td>
-            <td>30</td>
-            <td>$20.00</td>
-            <td>$600.00</td>
-        </tr>
-        <tr>
-            <td>Producto C</td>
-            <td>15</td>
-            <td>$30.00</td>
-            <td>$450.00</td>
+            <th colspan="2">Total Ventas</th>
+            <th th:text="${totalPurchases}">0</th>
+            <th></th>
         </tr>
         <tr>
             <th colspan="3">Total General</th>
-            <th>$1550.00</th>
+            <th th:text="Q + ${totalSpent}">Q 1550.00</th>
         </tr>
         </tbody>
     </table>
 
     <!-- Pie de página del reporte -->
     <div class="footer">
-        <p>Reporte generado automáticamente por el Sistema de Reportes XYZ. Todos los derechos reservados © 2024</p>
+        <p>Reporte generado automáticamente por el Sistema de Reportes. Todos los derechos reservados © 2024</p>
     </div>
 </div>
 </body>

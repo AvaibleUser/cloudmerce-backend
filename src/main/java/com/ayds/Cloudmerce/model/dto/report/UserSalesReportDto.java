@@ -6,6 +6,7 @@ import java.util.List;
 public record UserSalesReportDto (
         List<UserSalesDto> users,
         BigDecimal totalSpent,
-        Long totalPurchases
+        Long totalPurchases,
+        String dateReport
 ) {
 }
