@@ -3,86 +3,178 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Factura</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
+        font-family: "Arial", sans-serif;
         margin: 0;
         padding: 0;
+        background-color: #1e1e2e;
+        color: #cdd6f4;
+      }
+
+      h1,
+      h2 {
+        margin-bottom: 20px;
+      }
+      h1 {
+        color: #94e2d5;
+        font-size: 4rem;
+      }
+      h2 {
+        color: #a6adc8;
+      }
+      strong,
+      th {
+        color: #b4befe;
+      }
+
+      .flex {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+        justify-content: center;
       }
       .container {
-        width: 80%;
-        margin: 0 auto;
+        width: 800px;
+        margin: 50px auto;
+        background-color: #313244;
         padding: 20px;
-        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       }
+
       .header {
         text-align: center;
         margin-bottom: 30px;
+        color: #b4befe;
       }
+
       .logo {
-        max-width: 200px;
+        max-width: 150px;
+        max-height: 150px;
+      }
+
+      .invoice,
+      .client,
+      .invoice-details {
+        margin-bottom: 30px;
+        background-color: #181825;
+        padding: 10px 20px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .totals {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr;
+        gap: 0px 0px;
+        grid-auto-flow: row;
+        grid-template-areas: "nothing nothing totals";
+      }
+
+      .totals > *:first-child {
+        grid-area: totals;
+      }
+
+      .totals > * > * {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr;
+        gap: 0px 0px;
+        grid-auto-flow: row;
+        grid-template-areas: "title value";
+      }
+
+      .totals > * > *:first-child {
+        grid-area: title;
+      }
+
+      .totals > * > *:last-child {
+        grid-area: value;
+      }
+
+      .info {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 0px 0px;
+        grid-auto-flow: row;
+        grid-template-areas: "title info-1 info-1" "title info-2 info-2";
+      }
+
+      .info > .title {
+        grid-area: title;
+      }
+
+      .info > *:not(.title):first-child {
+        grid-area: info-1;
+      }
+
+      .info > *:not(.title):last-child {
+        grid-area: info-2;
+      }
+
+      h2 {
+        font-size: 1.5rem;
         margin-bottom: 10px;
       }
-      .company-info,
-      .client-info {
-        margin-bottom: 20px;
-      }
-      .invoice-details {
-        margin-bottom: 20px;
-      }
-      .invoice-details table {
+
+      table {
         width: 100%;
         border-collapse: collapse;
+        margin-top: 10px;
       }
-      .invoice-details th,
-      .invoice-details td {
+
+      th,
+      td {
+        padding: 10px;
         border: 1px solid #ddd;
-        padding: 8px;
         text-align: left;
       }
-      .total {
-        font-weight: bold;
-        text-align: right;
+
+      th {
+        background-color: #1e1e2e;
       }
-      .legal-info {
-        margin-top: 30px;
-        font-size: 12px;
-        color: #777;
+
+      .totals p {
+        font-weight: bold;
       }
     </style>
-    <title>Factura</title>
   </head>
   <body>
     <div class="container">
       <!-- Información de la Empresa -->
       <div class="header">
-        <img th:src="@{${company.logoPath}}" alt="Logo Empresa" class="logo" />
-        <h1 th:text="${company.name}">Nombre de la Empresa</h1>
+        <div class="flex">
+          <img
+            th:src="@{${company.logoPath}}"
+            src="/image.png"
+            alt="Logo Empresa"
+            class="logo"
+          />
+          <h1 th:text="${company.name}">Cloudmerce</h1>
+        </div>
         <p th:text="${company.address}">Dirección de la Empresa</p>
         <p th:text="${company.phone}">Teléfono</p>
         <p th:text="${company.email}">Correo Electrónico</p>
       </div>
 
-      <!-- Información de la Factura -->
-      <div class="invoice-info">
-        <h2>Factura</h2>
+      <div class="invoice info">
+        <h2 class="title">Factura</h2>
         <p>
-          <strong>Número de Factura:</strong>
+          <strong>Número:</strong>
           <span th:text="${bill.id}">0001</span>
         </p>
         <p>
           <strong>Fecha:</strong>
           <span th:text="${bill.order_date}">01/01/2024</span>
         </p>
-        <!-- <p th:if="${bill.shippingCode}">
-          <strong>Número de Pedido:</strong>
-          <span th:text="${bill.shippingCode}">123456</span>
-        </p> -->
       </div>
 
-      <!-- Información del Cliente -->
-      <div class="client-info">
-        <h2>Factura a:</h2>
+      <div class="client info">
+        <h2 class="title">Facturado a</h2>
         <p>
           <strong>Nombre:</strong>
           <span th:text="${client.name}">Nombre del Cliente</span>
@@ -93,9 +185,11 @@
         </p>
       </div>
 
-      <!-- Detalles de la Factura -->
       <div class="invoice-details">
-        <h2>Detalles de la Factura</h2>
+        <h2>Articulos pedidos</h2>
+
+        <br />
+
         <table>
           <thead>
             <tr>
@@ -109,29 +203,36 @@
             <tr th:each="item : ${cartItems}">
               <td th:text="${item.product.name}">Nombre del Producto</td>
               <td th:text="${item.quantity}">1</td>
-              <td th:text="${item.product.price}">$0.00</td>
-              <td th:text="${item.subTotal}">$0.00</td>
+              <td th:text="${item.product.price}">Q. 0.00</td>
+              <td th:text="${item.subTotal}">Q. 0.00</td>
             </tr>
           </tbody>
         </table>
-      </div>
 
-      <!-- Totales -->
-      <div class="totals">
-        <p>
-          <strong>Subtotal:</strong> <span th:text="${cart.total}">$0.00</span>
-        </p>
-        <p th:if="${bill.shippingCost}">
-          <strong>Costos de Envío:</strong>
-          <span th:text="${bill.shippingCost}">$0.00</span>
-        </p>
-        <p>
-          <strong>Impuestos:</strong> <span th:text="${cart.tax}">$0.00</span>
-        </p>
-        <p>
-          <strong>Total:</strong> <span th:text="${bill.total + cart.tax}">$0.00</span>
-        </p>
+        <br />
+
+        <div class="totals">
+          <div>
+            <p>
+              <strong>Subtotal:</strong>
+              <span th:text="${cart.total}">Q.0.00</span>
+            </p>
+            <p th:if="${bill.shippingCost}">
+              <strong>Costos de Envío:</strong>
+              <span th:text="${bill.shippingCost}">Q.0.00</span>
+            </p>
+            <p>
+              <strong>Impuestos:</strong>
+              <span th:text="${cart.tax}">Q.0.00</span>
+            </p>
+            <p>
+              <strong>Total:</strong>
+              <span th:text="${bill.total + cart.tax}">Q.0.00</span>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </body>
 </html>
+Z
