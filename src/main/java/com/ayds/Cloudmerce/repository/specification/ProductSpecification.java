@@ -19,7 +19,8 @@ public class ProductSpecification {
     public Specification<ProductEntity> byCategoriesWithId(Set<Long> categoryIds) {
         return (root, query, criteriaBuilder) -> {
             Join<ProductEntity, ProductCategoryEntity> productCategories = root.join("productCategories");
-            return productCategories.<Long>get("category_id").in(categoryIds);
+            Join<CategoryEntity, ProductEntity> categories = productCategories.join("category");
+            return categories.<Long>get("id").in(categoryIds);
         };
     }
 
