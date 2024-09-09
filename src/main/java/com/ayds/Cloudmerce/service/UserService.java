@@ -143,7 +143,7 @@ public class UserService {
                 .map(encoder::encode)
                 .ifPresent(dbUser::setPassword);
 
-        return toUserForGoogleAuth(dbUser);
+        return toUserForGoogleAuth(userRepository.save(dbUser));
     }
 
     @Transactional
