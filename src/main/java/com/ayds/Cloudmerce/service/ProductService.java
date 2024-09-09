@@ -1,10 +1,15 @@
 package com.ayds.Cloudmerce.service;
 
+import static com.ayds.Cloudmerce.enums.ProductState.DELETED;
+import static java.util.function.Predicate.not;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -76,7 +81,7 @@ public class ProductService {
     }
 
     public Optional<ProductDto> findProduct(long productId) {
-        return productRepository.findByIdAndStateNot(productId, ProductState.DELETED).map(ProductService::toProductDto);
+        return productRepository.findByIdAndStateNot(productId, DELETED).map(ProductService::toProductDto);
     }
 
     public Optional<ProductDto> findProductForCustomer(long productId) {
@@ -88,24 +93,15 @@ public class ProductService {
         Function<Specification<ProductEntity>, Optional<Specification<ProductEntity>>> addFilter = (
                 filter) -> optSpecification.map((spec) -> spec.and(filter)).or(() -> Optional.of(filter));
 
-        if (ObjectUtils.isEmpty(filters.categories())) {
-            addFilter.apply(productSpecification.byCategoriesWithId(filters.categories()));
-        }
-        if (ObjectUtils.isEmpty(filters.name())) {
-            addFilter.apply(productSpecification.byNameLike(filters.name()));
-        }
-        if (ObjectUtils.isEmpty(filters.description())) {
-            addFilter.apply(productSpecification.byDescriptionLike(filters.description()));
-        }
-        if (filters.price() != null) {
-            addFilter.apply(productSpecification.byPriceBetween(filters.price().min(), filters.price().max()));
-        }
-        if (filters.stock() != null) {
-            addFilter.apply(productSpecification.byStockGreaterThanOrEqualTo(filters.stock()));
-        }
-        if (filters.state() != null && filters.state() != ProductState.DELETED) {
-            addFilter.apply(productSpecification.byState(filters.state()));
-        }
+        Stream.of(
+                filters.categoryIds().map(productSpecification::byCategoriesWithId)
+                        .or(() -> filters.categoryNames().map(productSpecification::byCategoriesWithName)),
+                filters.name().map(productSpecification::byNameLike),
+                filters.description().map(productSpecification::byDescriptionLike),
+                filters.price().map(productSpecification::byPriceBetween),
+                filters.stock().map(productSpecification::byStockGreaterThanOrEqualTo),
+                filters.state().filter(not(DELETED::equals)).map(productSpecification::byState))
+                .forEach(filter -> filter.ifPresent(addFilter::apply));
 
         PageRequest pageReq = PageRequest.of(
                 filters.page().orElse(0),
@@ -158,42 +154,31 @@ public class ProductService {
     public ProductDto updateProduct(long productId, ProductUpdateDto product) {
         ProductEntity dbProduct = productRepository.findById(productId).get();
 
-        if (!ObjectUtils.isEmpty(product.name())) {
-            dbProduct.setName(product.name());
-        }
-        if (!ObjectUtils.isEmpty(product.description())) {
-            dbProduct.setDescription(product.description());
-        }
-        if (product.price() != null) {
-            dbProduct.setPrice(product.price());
-        }
-        if (product.stock() != null) {
-            dbProduct.setStock(product.stock());
-        }
-        if (product.state() != null && product.state() != ProductState.DELETED) {
-            dbProduct.setState(product.state());
-        }
-        if (product.categoryIds() != null || product.categoryIds() != null) {
-            if (product.categories().isEmpty() && product.categoryIds().isEmpty()) {
-                throw new BadRequestException("The product must have at least one category");
-            }
-            boolean useIds = !ObjectUtils.isEmpty(product.categoryIds());
+        product.name().ifPresent(dbProduct::setName);
+        product.description().ifPresent(dbProduct::setDescription);
+        product.price().ifPresent(dbProduct::setPrice);
+        product.stock().ifPresent(dbProduct::setStock);
+        product.state().filter(not(DELETED::equals)).ifPresent(dbProduct::setState);
+
+        if (product.categoryIds().isPresent() || product.categories().isPresent()) {
+            boolean useIds = product.categoryIds().isPresent();
+            Set<Long> ids = product.categoryIds().orElse(null);
+            Set<String> names = product.categories().orElse(null);
+
             Collection<ProductCategoryEntity> productCategoriesRemoved = useIds
-                    ? productCategoryRepository.findByProductIdAndCategoryIdNotIn(dbProduct.getId(),
-                            product.categoryIds())
-                    : productCategoryRepository.findByProductIdAndCategoryNameNotIn(dbProduct.getId(),
-                            product.categories());
+                    ? productCategoryRepository.findByProductIdAndCategoryIdNotIn(dbProduct.getId(), ids)
+                    : productCategoryRepository.findByProductIdAndCategoryNameNotIn(dbProduct.getId(), names);
 
             productCategoriesRemoved = productCategoriesRemoved
                     .stream()
                     .filter(category -> {
                         if (useIds) {
-                            if (product.categoryIds().contains(category.getCategory().getId())) {
-                                product.categoryIds().remove(category.getCategory().getId());
+                            if (ids.contains(category.getCategory().getId())) {
+                                ids.remove(category.getCategory().getId());
                                 return false;
                             }
-                        } else if (product.categories().contains(category.getCategory().getName())) {
-                            product.categories().remove(category.getCategory().getName());
+                        } else if (names.contains(category.getCategory().getName())) {
+                            names.remove(category.getCategory().getName());
                             return false;
                         }
                         return true;
@@ -203,11 +188,11 @@ public class ProductService {
             productCategoryRepository.deleteAll(productCategoriesRemoved);
 
             List<CategoryEntity> categories = useIds
-                    ? categoryRepository.findAllById(product.categoryIds())
-                    : categoryRepository.findAllByNameIn(product.categories());
+                    ? categoryRepository.findAllById(ids)
+                    : categoryRepository.findAllByNameIn(names);
 
-            if (ObjectUtils.isEmpty(categories) || product.categories().size() != categories.size()) {
-                int diff = Math.abs(product.categories().size() - categories.size());
+            if (ObjectUtils.isEmpty(categories) || (useIds ? ids.size() : names.size()) != categories.size()) {
+                int diff = Math.abs((useIds ? ids.size() : names.size()) - categories.size());
                 throw new ValueNotFoundException("There are " + diff + " categories not found");
             }
 
@@ -231,7 +216,7 @@ public class ProductService {
 
     public void deleteProduct(long productId) {
         ProductEntity product = productRepository.findById(productId).get();
-        product.setState(ProductState.DELETED);
+        product.setState(DELETED);
         productRepository.save(product);
     }
 }

@@ -10,8 +10,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.util.IOUtils;
 import com.ayds.Cloudmerce.model.exception.BadRequestException;
 
 @Service
@@ -49,6 +52,20 @@ public class FileStorageService {
     public String store(MultipartFile file) {
         String filename = file.getOriginalFilename();
         return store(filename, file);
+    }
+
+    public byte[] load(String filename) throws IOException {
+        GetObjectRequest getObjectRequest = new GetObjectRequest(bucketName, filename);
+        S3Object response = s3Client.getObject(getObjectRequest);
+
+        return IOUtils.toByteArray(response.getObjectContent());
+    }
+
+    public String loadContentType(String filename) {
+        GetObjectRequest getObjectRequest = new GetObjectRequest(bucketName, filename);
+        return s3Client.getObject(getObjectRequest)
+                .getObjectMetadata()
+                .getContentType();
     }
 
     public String loadUrl(String filename) {
