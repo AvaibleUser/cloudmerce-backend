@@ -13,11 +13,11 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.With;
 
 public record ProductUpdateDto(
-        Optional<@NotBlank String> name,
-        Optional<@NotBlank String> description,
-        Optional<@NotNull @PositiveOrZero Float> price,
-        Optional<@NotNull @PositiveOrZero Long> stock,
-        Optional<@NotNull ProductState> state,
+        Optional<String> name,
+        Optional<String> description,
+        Optional<@PositiveOrZero Float> price,
+        Optional<@PositiveOrZero Long> stock,
+        Optional<ProductState> state,
         Optional<@NotEmpty Set<@NotBlank String>> categories,
         Optional<@NotEmpty Set<@Positive @NotNull Long>> categoryIds,
         @With Set<Long> imageUrls) {

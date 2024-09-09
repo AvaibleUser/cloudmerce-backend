@@ -94,13 +94,25 @@ public class ProductService {
                 filter) -> optSpecification.map((spec) -> spec.and(filter)).or(() -> Optional.of(filter));
 
         Stream.of(
-                filters.categoryIds().map(productSpecification::byCategoriesWithId)
-                        .or(() -> filters.categoryNames().map(productSpecification::byCategoriesWithName)),
-                filters.name().map(productSpecification::byNameLike),
-                filters.description().map(productSpecification::byDescriptionLike),
-                filters.price().map(productSpecification::byPriceBetween),
-                filters.stock().map(productSpecification::byStockGreaterThanOrEqualTo),
-                filters.state().filter(not(DELETED::equals)).map(productSpecification::byState))
+                filters.categoryIds()
+                        .filter(Collection::isEmpty)
+                        .map(productSpecification::byCategoriesWithId)
+                        .or(() -> filters.categoryNames()
+                                .filter(Collection::isEmpty)
+                                .map(productSpecification::byCategoriesWithName)),
+                filters.name()
+                        .filter(not(ObjectUtils::isEmpty))
+                        .map(productSpecification::byNameLike),
+                filters.description()
+                        .filter(not(ObjectUtils::isEmpty))
+                        .map(productSpecification::byDescriptionLike),
+                filters.price()
+                        .map(productSpecification::byPriceBetween),
+                filters.stock()
+                        .map(productSpecification::byStockGreaterThanOrEqualTo),
+                filters.state()
+                        .filter(not(DELETED::equals))
+                        .map(productSpecification::byState))
                 .forEach(filter -> filter.ifPresent(addFilter::apply));
 
         PageRequest pageReq = PageRequest.of(
@@ -154,8 +166,8 @@ public class ProductService {
     public ProductDto updateProduct(long productId, ProductUpdateDto product) {
         ProductEntity dbProduct = productRepository.findById(productId).get();
 
-        product.name().ifPresent(dbProduct::setName);
-        product.description().ifPresent(dbProduct::setDescription);
+        product.name().filter(not(ObjectUtils::isEmpty)).ifPresent(dbProduct::setName);
+        product.description().filter(not(ObjectUtils::isEmpty)).ifPresent(dbProduct::setDescription);
         product.price().ifPresent(dbProduct::setPrice);
         product.stock().ifPresent(dbProduct::setStock);
         product.state().filter(not(DELETED::equals)).ifPresent(dbProduct::setState);
