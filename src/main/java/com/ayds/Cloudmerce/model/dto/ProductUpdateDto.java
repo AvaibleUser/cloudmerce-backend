@@ -6,7 +6,6 @@ import java.util.Set;
 import com.ayds.Cloudmerce.enums.ProductState;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -18,7 +17,7 @@ public record ProductUpdateDto(
         Optional<@PositiveOrZero Float> price,
         Optional<@PositiveOrZero Long> stock,
         Optional<ProductState> state,
-        Optional<@NotEmpty Set<@NotBlank String>> categories,
-        Optional<@NotEmpty Set<@Positive @NotNull Long>> categoryIds,
+        Optional<Set<@NotBlank String>> categories,
+        Optional<Set<@Positive @NotNull Long>> categoryIds,
         @With Set<Long> imageUrls) {
 }
