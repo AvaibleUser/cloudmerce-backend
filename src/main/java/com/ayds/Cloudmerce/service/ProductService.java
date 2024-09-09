@@ -42,6 +42,8 @@ import com.ayds.Cloudmerce.repository.ProductCategoryRepository;
 import com.ayds.Cloudmerce.repository.ProductRepository;
 import com.ayds.Cloudmerce.repository.specification.ProductSpecification;
 
+import jakarta.validation.constraints.Positive;
+
 @Service
 public class ProductService {
 
@@ -89,16 +91,12 @@ public class ProductService {
     }
 
     public Page<ProductDto> findPagedProductsFilteredBy(PagedProductFilteredDto filters) {
-        Optional<Specification<ProductEntity>> optSpecification = Optional.<Specification<ProductEntity>>empty();
-        Function<Specification<ProductEntity>, Optional<Specification<ProductEntity>>> addFilter = (
-                filter) -> optSpecification.map((spec) -> spec.and(filter)).or(() -> Optional.of(filter));
-
-        Stream.of(
+        Optional<Specification<ProductEntity>> optSpecification = Stream.of(
                 filters.categoryIds()
-                        .filter(Collection::isEmpty)
+                        .filter(not(Collection::isEmpty))
                         .map(productSpecification::byCategoriesWithId)
                         .or(() -> filters.categoryNames()
-                                .filter(Collection::isEmpty)
+                                .filter(not(Collection::isEmpty))
                                 .map(productSpecification::byCategoriesWithName)),
                 filters.name()
                         .filter(not(ObjectUtils::isEmpty))
@@ -113,7 +111,9 @@ public class ProductService {
                 filters.state()
                         .filter(not(DELETED::equals))
                         .map(productSpecification::byState))
-                .forEach(filter -> filter.ifPresent(addFilter::apply));
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .reduce((specification, filter) -> specification.and(filter));
 
         PageRequest pageReq = PageRequest.of(
                 filters.page().orElse(0),
