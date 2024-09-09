@@ -8,4 +8,5 @@ import com.ayds.Cloudmerce.model.entity.UserPermissionEntity;
 @Repository
 public interface UserPermissionRepository extends JpaRepository<UserPermissionEntity, Long> {
 
+    void deleteAllByUserIdInBatch(long userId);
 }
