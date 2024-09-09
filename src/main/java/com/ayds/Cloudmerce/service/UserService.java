@@ -172,7 +172,7 @@ public class UserService {
         }
         String encryptedPassword = encoder.encode(user.password());
 
-        RoleEntity role = roleRepository.findByName("CLIENTE").orElseThrow();
+        RoleEntity role = roleRepository.findByName("CLIENTE").or(() -> roleRepository.findById(1L)).orElseThrow();
         PaymentMethodEntity paymentMethod = paymentMethodRepository.findById(user.paymentPreferenceId()).orElseThrow();
 
         UserEntity newUser = new UserEntity(user.name(), user.email(), user.address(), user.nit(), encryptedPassword,
