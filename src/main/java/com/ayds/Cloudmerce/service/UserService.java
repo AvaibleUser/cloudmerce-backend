@@ -84,6 +84,21 @@ public class UserService {
     }
 
     @Transactional
+    public UserDto changeUserRole(Long userId, String role) {
+        RoleEntity dbRole = Optional.of(role)
+                .filter("ADMIN"::equals)
+                .flatMap(roleRepository::findByName)
+                .orElseThrow(() -> new ValueNotFoundException("No se pudo encontrar el role"));
+
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ValueNotFoundException("No se pudo encontrar los registros del usuario"));
+
+        user.setRole(dbRole);
+
+        return toUserDto(userRepository.save(user));
+    }
+
+    @Transactional
     public UserWithGoogleSecretDto changeUserInfo(Long userId, UserChangeDto user) {
         UserEntity dbUser = userRepository.findById(userId).get();
 
@@ -118,7 +133,7 @@ public class UserService {
         }
         String encryptedPassword = encoder.encode(user.password());
 
-        RoleEntity role = roleRepository.findById(user.roleId()).orElseThrow();
+        RoleEntity role = roleRepository.findByName("CLIENTE").orElseThrow();
         PaymentMethodEntity paymentMethod = paymentMethodRepository.findById(user.paymentPreferenceId()).orElseThrow();
 
         UserEntity newUser = new UserEntity(user.name(), user.email(), user.address(), user.nit(), encryptedPassword,

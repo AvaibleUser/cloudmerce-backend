@@ -10,6 +10,5 @@ public record SignUpDto(
         @NotBlank String address,
         @NotBlank String nit,
         @NotBlank String password,
-        @Positive @NotNull Long roleId,
         @Positive @NotNull Long paymentPreferenceId) {
 }
