@@ -1,9 +1,7 @@
 package com.ayds.Cloudmerce.controller.report;
 
 import com.ayds.Cloudmerce.model.dto.cart.OrderResponseDto;
-import com.ayds.Cloudmerce.model.dto.report.OrderReportDto;
-import com.ayds.Cloudmerce.model.dto.report.OrdersReportPdfDto;
-import com.ayds.Cloudmerce.model.dto.report.ProductSalesPdfDto;
+import com.ayds.Cloudmerce.model.dto.report.*;
 import com.ayds.Cloudmerce.service.*;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.OrderReportService;
@@ -31,6 +29,35 @@ public class OrdersReportsController {
 
     @Autowired
     private DownloadPdfService downloadPdfService;
+
+    @GetMapping("/users/more")
+    public ResponseEntity<Object>  getReportUserMoreShopping(@RequestParam(value = "size", defaultValue = "12") int size,
+                                                             @RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate,
+                                                             @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate,
+                                                             @RequestParam(value = "paymentMethod", defaultValue = "0") int paymentMethod, @RequestParam(value = "processStatus", defaultValue = "0") int processStatus) {
+        String order = "desc";
+        try {
+            UserOrderReportDto report = this.orderReportService.getUserOrdersReport(size, startDate, endDate, order, processStatus,paymentMethod);
+            return this.cartResponseService.responseSuccess(report,"Reporte generado con exito!",HttpStatus.OK);
+        }catch (Exception e) {
+            return this.cartResponseService.responseError("Error al intentar generar el reporte, comuniquese con soporte", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/users/less")
+    public ResponseEntity<Object> getReportUserLessShopping(@RequestParam(value = "size", defaultValue = "12") int size,
+                                                            @RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate,
+                                                            @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate,
+                                                            @RequestParam(value = "paymentMethod", defaultValue = "0") int paymentMethod, @RequestParam(value = "processStatus", defaultValue = "0") int processStatus) {
+        String order = "asc";
+        try {
+            UserOrderReportDto report = this.orderReportService.getUserOrdersReport(size, startDate, endDate, order, processStatus,paymentMethod);
+            return this.cartResponseService.responseSuccess(report,"Reporte generado con exito!",HttpStatus.OK);
+        }catch (Exception e) {
+            return this.cartResponseService.responseError("Error al intentar generar el reporte, comuniquese con soporte", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
 
 
 
@@ -61,5 +88,22 @@ public class OrdersReportsController {
                 "size", ordersReportPdfDto.size()
         );
         return this.downloadPdfService.downloadPdf("orderReport", templateVariables);
+    }
+
+    @GetMapping("/users/downloadPDF")
+    public ResponseEntity<Resource> downloadReportUser(@RequestBody UserOrderReportDtoPdf userOrderReportDtoPdf) {
+        Map<String, Object> templateVariables = Map.of(
+                "users", userOrderReportDtoPdf.userOrderReportDto().users(),
+                "totalCostDelivery", userOrderReportDtoPdf.userOrderReportDto().totalCostDelivery(),
+                "totalPurchases", userOrderReportDtoPdf.userOrderReportDto().totalPurchases(),
+                "totalSpent", userOrderReportDtoPdf.userOrderReportDto().totalSpent(),
+                "dateReport", userOrderReportDtoPdf.userOrderReportDto().dateReport(),
+                "typeReport", userOrderReportDtoPdf.typeReport(),
+                "rangeDate", userOrderReportDtoPdf.startDate() + " - " + userOrderReportDtoPdf.endDate(),
+                "payMethod", userOrderReportDtoPdf.paymentMethod(),
+                "status", userOrderReportDtoPdf.processStatus(),
+                "size", userOrderReportDtoPdf.size()
+        );
+        return this.downloadPdfService.downloadPdf("userOrderReport", templateVariables);
     }
 }
