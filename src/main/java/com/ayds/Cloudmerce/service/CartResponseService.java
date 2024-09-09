@@ -29,7 +29,7 @@ public class CartResponseService {
 
     public ResponseEntity<Object> responseError(String messageValue, HttpStatus status) {
         this.response.clear();
-        this.response.put(ERROR, messageValue);
+        this.response.put(ERROR, true);
         this.response.put(MESSAGE, messageValue);
         return new ResponseEntity<>(this.response, status);
     }
