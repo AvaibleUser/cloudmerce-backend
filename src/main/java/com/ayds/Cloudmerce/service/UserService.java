@@ -1,5 +1,7 @@
 package com.ayds.Cloudmerce.service;
 
+import static java.util.function.Predicate.not;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import com.ayds.Cloudmerce.model.dto.SignUpDto;
 import com.ayds.Cloudmerce.model.dto.UserChangeDto;
@@ -132,14 +135,20 @@ public class UserService {
     public UserWithGoogleSecretDto changeUserInfo(Long userId, UserChangeDto user) {
         UserEntity dbUser = userRepository.findById(userId).get();
 
-        user.address().ifPresent(dbUser::setAddress);
+        user.address()
+                .filter(not(ObjectUtils::isEmpty))
+                .ifPresent(dbUser::setAddress);
 
-        user.paymentMethod().map(paymentMethodRepository::findByName).ifPresent(dbUser::setPaymentPreference);
+        user.paymentMethod()
+                .filter(not(ObjectUtils::isEmpty))
+                .map(paymentMethodRepository::findByName)
+                .ifPresent(dbUser::setPaymentPreference);
 
         user.currentPassword()
-                .filter(passwd -> user.newPassword().isPresent())
+                .filter(not(ObjectUtils::isEmpty))
                 .filter(passwd -> encoder.matches(passwd, dbUser.getPassword()))
                 .flatMap(passwd -> user.newPassword())
+                .filter(not(ObjectUtils::isEmpty))
                 .map(encoder::encode)
                 .ifPresent(dbUser::setPassword);
 
