@@ -120,7 +120,7 @@ public class UserService {
             throw new BadRequestException("No se puede cambiar los permisos del usuario si no es ayudante");
         }
 
-        userPermissionRepository.deleteAllByUserIdInBatch(user.getId());
+        userPermissionRepository.deleteAllByUserId(user.getId());
         List<UserPermissionEntity> userPermissions = permissionRepository.findAllByNameIn(permissions)
                 .stream()
                 .map(permission -> new UserPermissionEntity(user, permission))
