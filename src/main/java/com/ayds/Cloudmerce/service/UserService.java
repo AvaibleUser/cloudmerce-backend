@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ayds.Cloudmerce.model.dto.SignUpDto;
+import com.ayds.Cloudmerce.model.dto.UserChangeDto;
 import com.ayds.Cloudmerce.model.dto.UserDto;
 import com.ayds.Cloudmerce.model.dto.UserWithGoogleSecretDto;
 import com.ayds.Cloudmerce.model.entity.PaymentMethodEntity;
@@ -84,6 +84,24 @@ public class UserService {
     }
 
     @Transactional
+    public UserWithGoogleSecretDto changeUserInfo(Long userId, UserChangeDto user) {
+        UserEntity dbUser = userRepository.findById(userId).get();
+
+        user.address().ifPresent(dbUser::setAddress);
+
+        user.paymentMethod().map(paymentMethodRepository::findByName).ifPresent(dbUser::setPaymentPreference);
+
+        user.currentPassword()
+                .filter(passwd -> user.newPassword().isPresent())
+                .filter(passwd -> encoder.matches(passwd, dbUser.getPassword()))
+                .flatMap(passwd -> user.newPassword())
+                .map(encoder::encode)
+                .ifPresent(dbUser::setPassword);
+
+        return toUserForGoogleAuth(dbUser);
+    }
+
+    @Transactional
     public UserDto addGoogleAuthentication(Long userId, String authKey) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new ValueNotFoundException("No se pudo encontrar los registros del usuario"));
@@ -96,7 +114,7 @@ public class UserService {
     @Transactional
     public UserDto registerUser(SignUpDto user) {
         if (userRepository.existsByEmail(user.email())) {
-            throw new DuplicateKeyException("El email que se intenta registrar ya esta en uso");
+            throw new BadRequestException("El email que se intenta registrar ya esta en uso");
         }
         String encryptedPassword = encoder.encode(user.password());
 

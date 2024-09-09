@@ -8,4 +8,5 @@ import com.ayds.Cloudmerce.model.entity.PaymentMethodEntity;
 @Repository
 public interface PaymentMethodRepository extends JpaRepository<PaymentMethodEntity, Long> {
 
+    PaymentMethodEntity findByName(String email);
 }

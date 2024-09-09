@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ import com.ayds.Cloudmerce.model.dto.GoogleAuthDto;
 import com.ayds.Cloudmerce.model.dto.GoogleAuthKeyDto;
 import com.ayds.Cloudmerce.model.dto.PasswordChangeDto;
 import com.ayds.Cloudmerce.model.dto.TokenDto;
+import com.ayds.Cloudmerce.model.dto.UserChangeDto;
 import com.ayds.Cloudmerce.model.dto.UserDto;
 import com.ayds.Cloudmerce.model.dto.UserWithGoogleSecretDto;
 import com.ayds.Cloudmerce.model.exception.BadRequestException;
@@ -48,6 +50,16 @@ public class UserController {
         long id = tokenService.getIdFromToken(request);
 
         return ResponseEntity.of(userService.findUserById(id));
+    }
+
+    @PutMapping
+    public ResponseEntity<TokenDto> changePassword(@NonNull HttpServletRequest request,
+            @RequestBody @Valid UserChangeDto user) {
+        long id = tokenService.getIdFromToken(request);
+
+        UserWithGoogleSecretDto dbUser = userService.changeUserInfo(id, user);
+
+        return ResponseEntity.ok(addTokenToUserData(dbUser));
     }
 
     @PatchMapping("/password")
