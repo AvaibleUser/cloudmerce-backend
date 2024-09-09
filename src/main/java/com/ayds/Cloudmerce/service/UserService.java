@@ -1,5 +1,7 @@
 package com.ayds.Cloudmerce.service;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +22,9 @@ import com.ayds.Cloudmerce.model.entity.UserPermissionEntity;
 import com.ayds.Cloudmerce.model.exception.BadRequestException;
 import com.ayds.Cloudmerce.model.exception.ValueNotFoundException;
 import com.ayds.Cloudmerce.repository.PaymentMethodRepository;
+import com.ayds.Cloudmerce.repository.PermissionRepository;
 import com.ayds.Cloudmerce.repository.RoleRepository;
+import com.ayds.Cloudmerce.repository.UserPermissionRepository;
 import com.ayds.Cloudmerce.repository.UserRepository;
 
 @Service
@@ -31,6 +35,12 @@ public class UserService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private UserPermissionRepository userPermissionRepository;
+
+    @Autowired
+    private PermissionRepository permissionRepository;
 
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
@@ -94,6 +104,26 @@ public class UserService {
                 .orElseThrow(() -> new ValueNotFoundException("No se pudo encontrar los registros del usuario"));
 
         user.setRole(dbRole);
+
+        return toUserDto(userRepository.save(user));
+    }
+
+    @Transactional
+    public UserDto changeUserPermissions(Long userId, Collection<String> permissions) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ValueNotFoundException("No se pudo encontrar los registros del usuario"));
+
+        if (!user.getRole().getName().equals("AYUDANTE")) {
+            throw new BadRequestException("No se puede cambiar los permisos del usuario si no es ayudante");
+        }
+
+        userPermissionRepository.deleteAllByUserIdInBatch(user.getId());
+        List<UserPermissionEntity> userPermissions = permissionRepository.findAllByNameIn(permissions)
+                .stream()
+                .map(permission -> new UserPermissionEntity(user, permission))
+                .toList();
+
+        user.setUserPermissions(new HashSet<>(userPermissionRepository.saveAll(userPermissions)));
 
         return toUserDto(userRepository.save(user));
     }

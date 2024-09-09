@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ayds.Cloudmerce.model.dto.GoogleAuthDto;
 import com.ayds.Cloudmerce.model.dto.GoogleAuthKeyDto;
 import com.ayds.Cloudmerce.model.dto.PasswordChangeDto;
+import com.ayds.Cloudmerce.model.dto.PermissionsChangeDto;
 import com.ayds.Cloudmerce.model.dto.RoleChangeDto;
 import com.ayds.Cloudmerce.model.dto.TokenDto;
 import com.ayds.Cloudmerce.model.dto.UserChangeDto;
@@ -79,6 +80,16 @@ public class UserController {
         long id = tokenService.getIdFromToken(request);
 
         UserDto dbUser = userService.changeUserRole(id, user.role());
+
+        return ResponseEntity.ok(dbUser);
+    }
+
+    @PatchMapping("/permissions")
+    public ResponseEntity<UserDto> changePermissions(@NonNull HttpServletRequest request,
+            @RequestBody @Valid PermissionsChangeDto user) {
+        long id = tokenService.getIdFromToken(request);
+
+        UserDto dbUser = userService.changeUserPermissions(id, user.permissions());
 
         return ResponseEntity.ok(dbUser);
     }
