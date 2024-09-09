@@ -7,21 +7,20 @@ import com.ayds.Cloudmerce.enums.ProductState;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.With;
 
 public record PagedProductFilteredDto(
-        Optional<@NotNull @PositiveOrZero Integer> page,
-        Optional<@NotNull @PositiveOrZero Integer> size,
-        Optional<@NotNull Boolean> descending,
-        Optional<@NotEmpty String[]> sortedBy,
-        Optional<@NotBlank String> name,
-        Optional<@NotBlank String> description,
+        Optional<@PositiveOrZero Integer> page,
+        Optional<@PositiveOrZero Integer> size,
+        Optional<Boolean> descending,
+        Optional<String[]> sortedBy,
+        Optional<String> name,
+        Optional<String> description,
         Optional<@Valid RangeDto<Float>> price,
-        @With Optional<@NotNull @PositiveOrZero Long> stock,
-        @With Optional<@NotNull ProductState> state,
-        Optional<@NotEmpty Set<Long>> categoryIds,
-        Optional<@NotEmpty Set<String>> categoryNames) {
+        @With Optional<@PositiveOrZero Long> stock,
+        @With Optional<ProductState> state,
+        Optional<Set<@Positive Long>> categoryIds,
+        Optional<Set<@NotBlank String>> categoryNames) {
 }
