@@ -15,7 +15,7 @@ spring:
     open-in-view: false
 
   mail:
-    host: smtp.example.com
+    host: smtp.gmail.com
     port: 587
     username: ${EMAIL_ADDRESS}
     password: ${EMAIL_PASSWORD}
@@ -29,6 +29,7 @@ spring:
 server:
   port: 8080
   error:
+    include-message: always
     include-binding-errors: always
 
 security:
@@ -41,5 +42,5 @@ aws:
   accessKey: ${AWS_ACCESS_KEY}
   secretKey: ${AWS_SECRET_KEY}
   s3:
-    region: region
-    bucketName: bucket
+    region: us-east-1
+    bucketName: ecommerce-ayds

@@ -6,6 +6,8 @@ import java.util.Set;
 import com.ayds.Cloudmerce.enums.ProductState;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.With;
 
@@ -14,10 +16,11 @@ public record PagedProductFilteredDto(
         Optional<@PositiveOrZero Integer> size,
         Optional<Boolean> descending,
         Optional<String[]> sortedBy,
-        String name,
-        String description,
-        @Valid RangeDto<Float> price,
-        @PositiveOrZero @With Long stock,
-        @With ProductState state,
-        Set<Long> categories) {
+        Optional<String> name,
+        Optional<String> description,
+        Optional<@Valid RangeDto<Float>> price,
+        @With Optional<@PositiveOrZero Long> stock,
+        @With Optional<ProductState> state,
+        Optional<Set<@Positive Long>> categoryIds,
+        Optional<Set<@NotBlank String>> categoryNames) {
 }
