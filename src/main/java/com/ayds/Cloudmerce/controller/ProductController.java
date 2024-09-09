@@ -45,8 +45,8 @@ public class ProductController {
     @GetMapping("/purchasable")
     public ResponseEntity<PagedModel<ProductDto>> getPagedProductsFilteredForCustomer(
             @Valid PagedProductFilteredDto productFilters) {
-        productFilters.withStock(1L);
-        productFilters.withState(ProductState.VISIBLE);
+        productFilters.withStock(Optional.of(1L));
+        productFilters.withState(Optional.of(ProductState.VISIBLE));
 
         Page<ProductDto> pagedProducts = productService.findPagedProductsFilteredBy(productFilters);
         return ResponseEntity.ok(new PagedModel<>(pagedProducts));
