@@ -10,10 +10,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "company_settings", schema = "company_control")
 @Getter
+@Setter
 @NoArgsConstructor
 @RequiredArgsConstructor
 @EqualsAndHashCode(of = "id")
@@ -33,7 +35,6 @@ public class CompanyEntity {
     @Column(name = "delivery_cost")
     private Float shippingCost;
 
-    @NonNull
     @Column(name = "logo_path")
     private String logoPath;
 }

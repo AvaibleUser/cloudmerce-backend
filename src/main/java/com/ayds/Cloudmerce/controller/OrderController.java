@@ -72,7 +72,12 @@ public class OrderController {
         return this.cartResponseService.responseSuccess(list,"Lista de todas las ORDENES", HttpStatus.OK);
     }
 
-    private String generateBill(OrderEntity order) {
+    @GetMapping("/{orderId}/bill-url")
+    public ResponseEntity<String> getGeneratedBillUrl(@PathVariable @Positive long orderId) {
+        return ResponseEntity.ok(storageService.loadUrl("factura_" + orderId + ".pdf"));
+    }
+
+    private void generateBill(OrderEntity order) {
         CartEntity cart = order.getCart();
         UserDto client = userService.findUserById(cart.getUserId()).orElseThrow();
         CompanyEntity company = companyService.findCompany(1).orElseThrow();
@@ -85,30 +90,27 @@ public class OrderController {
                 "company", company);
 
         String billHtml = templateRendererService.renderTemplate("bill", templateVariables);
-        String billUrl = null;
 
         try {
             byte[] pdfBytes = pdfService.generatePdfFromHtmlString(billHtml);
+            String billUrl;
 
             try (InputStream inputStream = new ByteArrayInputStream(pdfBytes)) {
                 billUrl = storageService.store("factura_" + order.getId() + ".pdf", inputStream, MediaType.APPLICATION_PDF_VALUE,
                         pdfBytes.length);
             }
+
+            String billEmail = templateRendererService.renderTemplate("bill",
+                    Map.of("client", client, "billUrl", billUrl));
+    
+            try {
+                emailService.sendHtmlEmail(company.getName(), client.email(), "Factura de Cloudmerce", billEmail);
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        try {
-            emailService.sendHtmlEmail(company.getName(), client.email(),
-                    "Factura de la compra", // un asunto mejor
-                    billHtml);
-        } catch (MessagingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return billUrl;
     }
 
     @PatchMapping(path = "{orderId}")
@@ -127,6 +129,10 @@ public class OrderController {
                 return this.cartResponseService.responseError("No Existe la ORDEN al que intenta actulizar ", HttpStatus.CONFLICT);
             }
             OrderDTO orderResponse = this.cartService.updateStatusOrderAndCart(orderUpdate,process);
+
+            if (process.getStatus().equals("Completado")) {
+                generateBill(orderUpdate);
+            }
             return this.cartResponseService.responseSuccess(orderResponse,"Orden actulizado a: "+ process.getStatus()+" con exito!", HttpStatus.ACCEPTED);
         }catch (Exception e){
             return this.cartResponseService.responseError("A ocurrido un error al procesar el Carrito de Compras, Revisa los datos proporcionados, porfavor intentalo de nuevo", HttpStatus.INTERNAL_SERVER_ERROR);
