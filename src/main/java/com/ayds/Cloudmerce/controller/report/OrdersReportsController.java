@@ -75,7 +75,7 @@ public class OrdersReportsController {
         }
     }
 
-    @GetMapping("/downloadPDF")
+    @PostMapping("/downloadPDF")
     public ResponseEntity<Resource> downloadReport(@RequestBody OrdersReportPdfDto ordersReportPdfDto) {
         Map<String, Object> templateVariables = Map.of(
                 "orders", ordersReportPdfDto.orderReportDto().orders(),
@@ -90,7 +90,7 @@ public class OrdersReportsController {
         return this.downloadPdfService.downloadPdf("orderReport", templateVariables);
     }
 
-    @GetMapping("/users/downloadPDF")
+    @PostMapping("/users/downloadPDF")
     public ResponseEntity<Resource> downloadReportUser(@RequestBody UserOrderReportDtoPdf userOrderReportDtoPdf) {
         Map<String, Object> templateVariables = Map.of(
                 "users", userOrderReportDtoPdf.userOrderReportDto().users(),

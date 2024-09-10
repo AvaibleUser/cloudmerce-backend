@@ -58,7 +58,7 @@ public class UserSalesReportController {
      * apartado para la generacion de pdf y excel
      */
 
-    @GetMapping("/downloadPDF")
+    @PostMapping("/downloadPDF")
     public ResponseEntity<Resource> downloadReport(@RequestBody UserSalesReportPdf userSalesReportPdf) {
         Map<String, Object> templateVariables = Map.of(
                 "users", userSalesReportPdf.userSalesReportDto().users(),

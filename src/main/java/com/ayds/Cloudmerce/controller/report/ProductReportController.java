@@ -56,7 +56,7 @@ public class ProductReportController {
         }
     }
 
-    @GetMapping("/downloadPDF")
+    @PostMapping("/downloadPDF")
     public ResponseEntity<Resource> downloadReport(@RequestBody ProductReportPdfDto productReportPdfDto) {
         Map<String, Object> templateVariables = Map.of(
                 "products", productReportPdfDto.productReportDto().products(),
