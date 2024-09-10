@@ -31,12 +31,13 @@ public class ProductReportController {
     private DownloadPdfService downloadPdfService;
 
     @GetMapping("/more")
-    public ResponseEntity<Object> getReportUserMoreShopping(@RequestParam(value = "size", defaultValue = "12") int size,
+    public ResponseEntity<Object> getReportProductMore(@RequestParam(value = "size", defaultValue = "12") int size,
                                                             @RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate,
-                                                            @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate) {
+                                                            @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate,
+                                                       @RequestParam(value = "stock", required = false, defaultValue = "false") boolean stock) {
         String order = "desc";
         try {
-            ProductReportDto report = this.productReportService.getProductStockReport(size, startDate, endDate, order);
+            ProductReportDto report = this.productReportService.getProductStockReport(size, startDate, endDate, order, stock);
             return this.cartResponseService.responseSuccess(report,"Reporte generado con exito!", HttpStatus.OK);
         }catch (Exception e) {
             return this.cartResponseService.responseError("Error al intentar generar el reporte, comuniquese con soporte", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -44,12 +45,13 @@ public class ProductReportController {
     }
 
     @GetMapping("/less")
-    public ResponseEntity<Object> getReportUserLessShopping(@RequestParam(value = "size", defaultValue = "12") int size,
+    public ResponseEntity<Object> getReportProductLess(@RequestParam(value = "size", defaultValue = "12") int size,
                                                             @RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate,
-                                                            @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate) {
+                                                            @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate,
+                                                       @RequestParam(value = "stock", required = false, defaultValue = "false") boolean stock) {
         String order = "asc";
         try {
-            ProductReportDto report = this.productReportService.getProductStockReport(size, startDate, endDate, order);
+            ProductReportDto report = this.productReportService.getProductStockReport(size, startDate, endDate, order, stock);
             return this.cartResponseService.responseSuccess(report,"Reporte generado con exito!", HttpStatus.OK);
         }catch (Exception e) {
             return this.cartResponseService.responseError("Error al intentar generar el reporte, comuniquese con soporte", HttpStatus.INTERNAL_SERVER_ERROR);
