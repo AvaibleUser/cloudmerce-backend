@@ -27,7 +27,7 @@ public class ProductReportService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public ProductReportDto getProductStockReport(int size, String startDate, String endDate, String order) {
+    public ProductReportDto getProductStockReport(int size, String startDate, String endDate, String order,boolean stock) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> cq = cb.createQuery(Object[].class);
 
@@ -43,15 +43,27 @@ public class ProductReportService {
                 startDateInstant,
                 endDateInstant);
 
-        // Seleccionar columnas necesarias
-        cq.multiselect(
-                        productRoot.get("name"),
-                        productRoot.get("price"),
-                        productRoot.get("stock"),
-                        productRoot.get("creationAt"))
-                .where(datePredicate)
-                .orderBy(order.equalsIgnoreCase("desc") ? cb.desc(productRoot.get("stock")) : cb.asc(productRoot.get("stock")));
+        if (stock) {
+            // Seleccionar columnas necesarias
+            cq.multiselect(
+                            productRoot.get("name"),
+                            productRoot.get("price"),
+                            productRoot.get("stock"),
+                            productRoot.get("creationAt"))
+                    .where(datePredicate)
+                    .orderBy(order.equalsIgnoreCase("desc") ? cb.desc(productRoot.get("stock")) : cb.asc(productRoot.get("stock")));
 
+        }else{
+            // Seleccionar columnas necesarias
+            cq.multiselect(
+                            productRoot.get("name"),
+                            productRoot.get("price"),
+                            productRoot.get("stock"),
+                            productRoot.get("creationAt"))
+                    .where(datePredicate)
+                    .orderBy(order.equalsIgnoreCase("desc") ? cb.desc(productRoot.get("price")) : cb.asc(productRoot.get("price")));
+
+        }
         // Ejecutar la consulta
         List<Object[]> results = entityManager.createQuery(cq)
                 .setMaxResults(size)

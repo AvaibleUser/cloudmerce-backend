@@ -2,6 +2,8 @@ package com.ayds.Cloudmerce.controller.report;
 
 import com.ayds.Cloudmerce.model.dto.report.UserSalesReportDto;
 import com.ayds.Cloudmerce.model.dto.report.UserSalesReportPdf;
+import com.ayds.Cloudmerce.model.entity.CompanyEntity;
+import com.ayds.Cloudmerce.repository.CompanyRepository;
 import com.ayds.Cloudmerce.service.CartResponseService;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.UserSalesReportService;
@@ -10,6 +12,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -24,6 +27,8 @@ public class UserSalesReportController {
 
     @Autowired
     private DownloadPdfService downloadPdfService;
+    @Autowired
+    private CompanyRepository companyRepository;
 
     @GetMapping("/more")
     public ResponseEntity<Object>  getReportUserMoreShopping(@RequestParam(value = "size", defaultValue = "12") int size,
@@ -58,19 +63,29 @@ public class UserSalesReportController {
      * apartado para la generacion de pdf y excel
      */
 
-    @GetMapping("/downloadPDF")
+    @PostMapping("/downloadPDF")
     public ResponseEntity<Resource> downloadReport(@RequestBody UserSalesReportPdf userSalesReportPdf) {
-        Map<String, Object> templateVariables = Map.of(
-                "users", userSalesReportPdf.userSalesReportDto().users(),
-                "totalPurchases", userSalesReportPdf.userSalesReportDto().totalPurchases(),
-                "totalSpent", userSalesReportPdf.userSalesReportDto().totalSpent(),
-                "dateReport", userSalesReportPdf.userSalesReportDto().dateReport(),
-                "typeReport", userSalesReportPdf.typeReport(),
-                "rangeDate", userSalesReportPdf.startDate() + " - " + userSalesReportPdf.endDate(),
-                "payMethod", userSalesReportPdf.paymentMethod(),
-                "status", userSalesReportPdf.processStatus(),
-                "size", userSalesReportPdf.size()
-        );
+        CompanyEntity companyEntity = companyRepository.findTopByOrderByIdAsc();
+        String nameCompany = "compañia Z.X.Y";
+        String companyLogo = "https://e7.pngegg.com/pngimages/996/491/png-clipart-shopify-e-commerce-logo-web-design-design-web-design-logo.png";
+        if (companyEntity != null) {
+            nameCompany = companyEntity.getName();
+            companyLogo = companyEntity.getLogoPath();
+        }
+
+        Map<String, Object> templateVariables = new HashMap<>();
+        templateVariables.put("users", userSalesReportPdf.userSalesReportDto().users());
+        templateVariables.put("totalPurchases", userSalesReportPdf.userSalesReportDto().totalPurchases());
+        templateVariables.put("totalSpent", userSalesReportPdf.userSalesReportDto().totalSpent());
+        templateVariables.put("dateReport", userSalesReportPdf.userSalesReportDto().dateReport());
+        templateVariables.put("typeReport", userSalesReportPdf.typeReport());
+        templateVariables.put("rangeDate", userSalesReportPdf.startDate() + " - " + userSalesReportPdf.endDate());
+        templateVariables.put("payMethod", userSalesReportPdf.paymentMethod());
+        templateVariables.put("status", userSalesReportPdf.processStatus());
+        templateVariables.put("size", userSalesReportPdf.size());
+        templateVariables.put("nameCompany", nameCompany);
+        templateVariables.put("companyLogo", companyLogo);
+
         return this.downloadPdfService.downloadPdf("userSalesReport", templateVariables);
     }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Reporte de Ordenes</title>
+    <title>Reporte de Ventas</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -117,7 +117,7 @@
     <!-- Encabezado del reporte -->
     <div class="header">
         <div class="left">
-            <h1>Reporte de Ordenes </h1>
+            <h1>Reporte de General </h1>
             <h2 th:text="${nameCompany} ">compania X.Y.Z</h2>
         </div>
         <img th:src="@{${companyLogo}}"
@@ -129,17 +129,17 @@
     <div class="report-info">
         <div class="company-info">
             <h3>Detalles del Reporte</h3>
-            <p><strong>Fecha del reporte:</strong> <span th:text="${dateReport}">--</span> </p>
-            <p><strong>Tipo Reporte: </strong><span th:text="${typeReport}">--</span></p>
-            <p><strong>Tipo Criterio: </strong>Estado</p>
-            <p><strong>Periodo:</strong> <span th:text="${rangeDate}">---</span> </p>
+            <p><strong>Fecha del reporte:</strong> <span th:text="${report.dateReport}">--</span> </p>
+            <p><strong>Tipo Reporte: </strong>General</p>
+            <p><strong>Tipo Criterio: </strong>Total General</p>
+            <p><strong>Periodo:</strong> <span th:text="${report.rangeDate}">---</span> </p>
         </div>
 
         <div class="report-details">
             <h3>Filtros Aplicados</h3>
-            <p><strong>Metodo de pago:</strong> <span th:text="${payMethod}">---</span></p>
-            <p><strong>Estado :</strong> <span th:text="${status}">---</span></p>
-            <p><strong>Cantidad :</strong> <span th:text="${size}">---</span></p>
+            <p><strong>Metodo de pago:</strong> No</p>
+            <p><strong>Estado :</strong> No</p>
+            <p><strong>Cantidad :</strong> No</p>
         </div>
 
         <div class="clearfix"></div>
@@ -149,24 +149,45 @@
     <table>
         <thead>
         <tr>
-            <th>Usuario</th>
-            <th>Fecha de Orden</th>
-            <th>Fecha de Envio</th>
-            <th>Fecha de Entrega</th>
-            <th>Total</th>
+            <th>Grupo</th>
+            <th>Total unidades</th>
+            <th>Total General</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="item : ${orders}">
-            <td th:text="${item.user}">Cliente A</td>
-            <td th:text="${item.orderDate}">50</td>
-            <td th:text="${item.deliveryDate}">10</td>
-            <td th:text="${item.shippingDate}">Q 500.00</td>
-            <td th:text="Q +${item.total}">Q 500.00</td>
+        <tr>
+            <th>Productos Vendidos (no repetidos)</th>
+            <td th:text="${report.totalUniqueProducts}">0</td>
+            <td th:text="Q +${report.totalAmountSold}">Q 500.00</td>
         </tr>
         <tr>
-            <th colspan="4">Total General</th>
-            <th th:text="Q + ${totalSpent}">Q 1550.00</th>
+            <th>Usuarios Compras (no repetidos)</th>
+            <td th:text="${report.totalUniqueUsers}">0</td>
+            <td th:text="Q +${report.totalAmountSold}">Q 500.00</td>
+        </tr>
+        <tr>
+            <th>Ordenes</th>
+            <td th:text="${report.totalOrders}">0</td>
+            <td th:text="Q +${report.totalAmountOrd}">Q 500.00</td>
+        </tr>
+        <tr>
+            <th>Ingreso por Envio de Odenes</th>
+            <td th:text="${report.totalOrders}">0</td>
+            <td th:text="Q +${report.totalShippingCost}">Q 500.00</td>
+        </tr>
+        <tr>
+            <th>Ventas sin Orden</th>
+            <td th:text="${report.totalSalesNoOrder}">0</td>
+            <td th:text="Q +${report.totalAmountSoldNoOrder}">Q 500.00</td>
+        </tr>
+        <tr>
+            <th>Ventas</th>
+            <td th:text="${report.totalSales}">0</td>
+            <td th:text="Q +${report.totalAmountSold}">Q 500.00</td>
+        </tr>
+        <tr>
+            <th colspan="2">Total Ingreso (ventas (odenes) + costo envio)</th>
+            <th th:text="Q + ${report.total}">0</th>
         </tr>
         </tbody>
     </table>

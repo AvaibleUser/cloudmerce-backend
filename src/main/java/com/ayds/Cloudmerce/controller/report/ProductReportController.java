@@ -4,6 +4,8 @@ import com.ayds.Cloudmerce.model.dto.report.ProductReportDto;
 import com.ayds.Cloudmerce.model.dto.report.ProductReportPdfDto;
 import com.ayds.Cloudmerce.model.dto.report.ProductSalesPdfDto;
 import com.ayds.Cloudmerce.model.dto.report.UserSalesReportPdf;
+import com.ayds.Cloudmerce.model.entity.CompanyEntity;
+import com.ayds.Cloudmerce.repository.CompanyRepository;
 import com.ayds.Cloudmerce.service.CartResponseService;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.ProductReportService;
@@ -30,13 +32,17 @@ public class ProductReportController {
     @Autowired
     private DownloadPdfService downloadPdfService;
 
+    @Autowired
+    private CompanyRepository companyRepository;
+
     @GetMapping("/more")
-    public ResponseEntity<Object> getReportUserMoreShopping(@RequestParam(value = "size", defaultValue = "12") int size,
+    public ResponseEntity<Object> getReportProductMore(@RequestParam(value = "size", defaultValue = "12") int size,
                                                             @RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate,
-                                                            @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate) {
+                                                            @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate,
+                                                       @RequestParam(value = "stock", required = false, defaultValue = "false") boolean stock) {
         String order = "desc";
         try {
-            ProductReportDto report = this.productReportService.getProductStockReport(size, startDate, endDate, order);
+            ProductReportDto report = this.productReportService.getProductStockReport(size, startDate, endDate, order, stock);
             return this.cartResponseService.responseSuccess(report,"Reporte generado con exito!", HttpStatus.OK);
         }catch (Exception e) {
             return this.cartResponseService.responseError("Error al intentar generar el reporte, comuniquese con soporte", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -44,27 +50,38 @@ public class ProductReportController {
     }
 
     @GetMapping("/less")
-    public ResponseEntity<Object> getReportUserLessShopping(@RequestParam(value = "size", defaultValue = "12") int size,
+    public ResponseEntity<Object> getReportProductLess(@RequestParam(value = "size", defaultValue = "12") int size,
                                                             @RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate,
-                                                            @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate) {
+                                                            @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate,
+                                                       @RequestParam(value = "stock", required = false, defaultValue = "false") boolean stock) {
         String order = "asc";
         try {
-            ProductReportDto report = this.productReportService.getProductStockReport(size, startDate, endDate, order);
+            ProductReportDto report = this.productReportService.getProductStockReport(size, startDate, endDate, order, stock);
             return this.cartResponseService.responseSuccess(report,"Reporte generado con exito!", HttpStatus.OK);
         }catch (Exception e) {
             return this.cartResponseService.responseError("Error al intentar generar el reporte, comuniquese con soporte", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @GetMapping("/downloadPDF")
+    @PostMapping("/downloadPDF")
     public ResponseEntity<Resource> downloadReport(@RequestBody ProductReportPdfDto productReportPdfDto) {
+        CompanyEntity companyEntity = companyRepository.findTopByOrderByIdAsc();
+        String nameCompany = "compañia Z.X.Y";
+        String companyLogo = "https://e7.pngegg.com/pngimages/996/491/png-clipart-shopify-e-commerce-logo-web-design-design-web-design-logo.png";
+        if (companyEntity != null) {
+            nameCompany = companyEntity.getName();
+            companyLogo = companyEntity.getLogoPath();
+        }
+
         Map<String, Object> templateVariables = Map.of(
                 "products", productReportPdfDto.productReportDto().products(),
                 "totalStock", productReportPdfDto.productReportDto().totalStock(),
                 "dateReport", productReportPdfDto.productReportDto().dateReport(),
                 "typeReport", productReportPdfDto.typeReport(),
                 "rangeDate", productReportPdfDto.startDate() + " - " + productReportPdfDto.endDate(),
-                "size", productReportPdfDto.size()
+                "size", productReportPdfDto.size(),
+                "nameCompany", nameCompany,
+                "companyLogo", companyLogo
         );
         return this.downloadPdfService.downloadPdf("productReport", templateVariables);
     }
