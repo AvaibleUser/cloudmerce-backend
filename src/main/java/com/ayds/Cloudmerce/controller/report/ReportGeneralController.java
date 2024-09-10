@@ -4,6 +4,8 @@ import com.ayds.Cloudmerce.model.dto.report.ReportGeneralDto;
 import com.ayds.Cloudmerce.model.dto.report.ReportGeneralPdfDto;
 import com.ayds.Cloudmerce.model.dto.report.UserSalesReportDto;
 import com.ayds.Cloudmerce.model.dto.report.UserSalesReportPdf;
+import com.ayds.Cloudmerce.model.entity.CompanyEntity;
+import com.ayds.Cloudmerce.repository.CompanyRepository;
 import com.ayds.Cloudmerce.service.CartResponseService;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.SalesReportService;
@@ -30,6 +32,9 @@ public class ReportGeneralController {
     @Autowired
     private SalesReportService salesReportService;
 
+    @Autowired
+    private CompanyRepository companyRepository;
+
     @GetMapping
     public ResponseEntity<Object> getReportGeneral(@RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate,
                                                    @RequestParam(value = "endDate", defaultValue = "2099-12-31") String endDate) {
@@ -49,8 +54,18 @@ public class ReportGeneralController {
 
     @PostMapping("/downloadPDF")
     public ResponseEntity<Resource> downloadReport(@RequestBody ReportGeneralPdfDto reportGeneralPdfDto) {
+        CompanyEntity companyEntity = companyRepository.findTopByOrderByIdAsc();
+        String nameCompany = "compañia Z.X.Y";
+        String companyLogo = "https://e7.pngegg.com/pngimages/996/491/png-clipart-shopify-e-commerce-logo-web-design-design-web-design-logo.png";
+        if (companyEntity != null) {
+            nameCompany = companyEntity.getName();
+            companyLogo = companyEntity.getLogoPath();
+        }
+
         Map<String, Object> templateVariables = Map.of(
-                "report", reportGeneralPdfDto
+                "report", reportGeneralPdfDto,
+                "nameCompany", nameCompany,
+                "companyLogo", companyLogo
         );
         return this.downloadPdfService.downloadPdf("reportGeneral", templateVariables);
     }

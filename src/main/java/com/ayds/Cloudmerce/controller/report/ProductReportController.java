@@ -4,6 +4,8 @@ import com.ayds.Cloudmerce.model.dto.report.ProductReportDto;
 import com.ayds.Cloudmerce.model.dto.report.ProductReportPdfDto;
 import com.ayds.Cloudmerce.model.dto.report.ProductSalesPdfDto;
 import com.ayds.Cloudmerce.model.dto.report.UserSalesReportPdf;
+import com.ayds.Cloudmerce.model.entity.CompanyEntity;
+import com.ayds.Cloudmerce.repository.CompanyRepository;
 import com.ayds.Cloudmerce.service.CartResponseService;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.ProductReportService;
@@ -29,6 +31,9 @@ public class ProductReportController {
 
     @Autowired
     private DownloadPdfService downloadPdfService;
+
+    @Autowired
+    private CompanyRepository companyRepository;
 
     @GetMapping("/more")
     public ResponseEntity<Object> getReportProductMore(@RequestParam(value = "size", defaultValue = "12") int size,
@@ -60,13 +65,23 @@ public class ProductReportController {
 
     @PostMapping("/downloadPDF")
     public ResponseEntity<Resource> downloadReport(@RequestBody ProductReportPdfDto productReportPdfDto) {
+        CompanyEntity companyEntity = companyRepository.findTopByOrderByIdAsc();
+        String nameCompany = "compañia Z.X.Y";
+        String companyLogo = "https://e7.pngegg.com/pngimages/996/491/png-clipart-shopify-e-commerce-logo-web-design-design-web-design-logo.png";
+        if (companyEntity != null) {
+            nameCompany = companyEntity.getName();
+            companyLogo = companyEntity.getLogoPath();
+        }
+
         Map<String, Object> templateVariables = Map.of(
                 "products", productReportPdfDto.productReportDto().products(),
                 "totalStock", productReportPdfDto.productReportDto().totalStock(),
                 "dateReport", productReportPdfDto.productReportDto().dateReport(),
                 "typeReport", productReportPdfDto.typeReport(),
                 "rangeDate", productReportPdfDto.startDate() + " - " + productReportPdfDto.endDate(),
-                "size", productReportPdfDto.size()
+                "size", productReportPdfDto.size(),
+                "nameCompany", nameCompany,
+                "companyLogo", companyLogo
         );
         return this.downloadPdfService.downloadPdf("productReport", templateVariables);
     }

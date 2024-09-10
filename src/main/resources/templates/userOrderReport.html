@@ -118,9 +118,11 @@
     <div class="header">
         <div class="left">
             <h1>Reporte de Ordenes </h1>
-            <h2>Nombre de la compania</h2>
+            <h2 th:text="${nameCompany} ">compania X.Y.Z</h2>
         </div>
-        <img src="https://dca.gob.gt/noticias-guatemala-diario-centro-america/wp-content/uploads/2023/12/Nota-1.1.jpg" alt="Logo de la Empresa" />
+        <img th:src="@{${companyLogo}}"
+             src="/image.png"
+             alt="Logo Empresa"/>
     </div>
 
     <!-- Información de la empresa y del reporte -->

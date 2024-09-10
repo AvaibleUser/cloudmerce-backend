@@ -2,6 +2,8 @@ package com.ayds.Cloudmerce.controller.report;
 
 import com.ayds.Cloudmerce.model.dto.cart.OrderResponseDto;
 import com.ayds.Cloudmerce.model.dto.report.*;
+import com.ayds.Cloudmerce.model.entity.CompanyEntity;
+import com.ayds.Cloudmerce.repository.CompanyRepository;
 import com.ayds.Cloudmerce.service.*;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.OrderReportService;
@@ -11,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +32,9 @@ public class OrdersReportsController {
 
     @Autowired
     private DownloadPdfService downloadPdfService;
+
+    @Autowired
+    private CompanyRepository companyRepository;
 
     @GetMapping("/users/more")
     public ResponseEntity<Object>  getReportUserMoreShopping(@RequestParam(value = "size", defaultValue = "12") int size,
@@ -77,6 +83,14 @@ public class OrdersReportsController {
 
     @PostMapping("/downloadPDF")
     public ResponseEntity<Resource> downloadReport(@RequestBody OrdersReportPdfDto ordersReportPdfDto) {
+        CompanyEntity companyEntity = companyRepository.findTopByOrderByIdAsc();
+        String nameCompany = "compañia Z.X.Y";
+        String companyLogo = "https://e7.pngegg.com/pngimages/996/491/png-clipart-shopify-e-commerce-logo-web-design-design-web-design-logo.png";
+        if (companyEntity != null) {
+            nameCompany = companyEntity.getName();
+            companyLogo = companyEntity.getLogoPath();
+        }
+
         Map<String, Object> templateVariables = Map.of(
                 "orders", ordersReportPdfDto.orderReportDto().orders(),
                 "totalSpent", ordersReportPdfDto.orderReportDto().totalSpent(),
@@ -85,25 +99,38 @@ public class OrdersReportsController {
                 "rangeDate", ordersReportPdfDto.startDate() + " - " + ordersReportPdfDto.endDate(),
                 "payMethod", ordersReportPdfDto.paymentMethod(),
                 "status", ordersReportPdfDto.processStatus(),
-                "size", ordersReportPdfDto.size()
+                "size", ordersReportPdfDto.size(),
+                "nameCompany", nameCompany,
+                "companyLogo", companyLogo
         );
         return this.downloadPdfService.downloadPdf("orderReport", templateVariables);
     }
 
     @PostMapping("/users/downloadPDF")
     public ResponseEntity<Resource> downloadReportUser(@RequestBody UserOrderReportDtoPdf userOrderReportDtoPdf) {
-        Map<String, Object> templateVariables = Map.of(
-                "users", userOrderReportDtoPdf.userOrderReportDto().users(),
-                "totalCostDelivery", userOrderReportDtoPdf.userOrderReportDto().totalCostDelivery(),
-                "totalPurchases", userOrderReportDtoPdf.userOrderReportDto().totalPurchases(),
-                "totalSpent", userOrderReportDtoPdf.userOrderReportDto().totalSpent(),
-                "dateReport", userOrderReportDtoPdf.userOrderReportDto().dateReport(),
-                "typeReport", userOrderReportDtoPdf.typeReport(),
-                "rangeDate", userOrderReportDtoPdf.startDate() + " - " + userOrderReportDtoPdf.endDate(),
-                "payMethod", userOrderReportDtoPdf.paymentMethod(),
-                "status", userOrderReportDtoPdf.processStatus(),
-                "size", userOrderReportDtoPdf.size()
-        );
+        CompanyEntity companyEntity = companyRepository.findTopByOrderByIdAsc();
+        String nameCompany = "compañia Z.X.Y";
+        String companyLogo = "https://e7.pngegg.com/pngimages/996/491/png-clipart-shopify-e-commerce-logo-web-design-design-web-design-logo.png";
+        if (companyEntity != null) {
+            nameCompany = companyEntity.getName();
+            companyLogo = companyEntity.getLogoPath();
+        }
+
+        Map<String, Object> templateVariables = new HashMap<>();
+        templateVariables.put("users", userOrderReportDtoPdf.userOrderReportDto().users());
+        templateVariables.put("totalCostDelivery", userOrderReportDtoPdf.userOrderReportDto().totalCostDelivery());
+        templateVariables.put("totalPurchases", userOrderReportDtoPdf.userOrderReportDto().totalPurchases());
+        templateVariables.put("totalSpent", userOrderReportDtoPdf.userOrderReportDto().totalSpent());
+        templateVariables.put("dateReport", userOrderReportDtoPdf.userOrderReportDto().dateReport());
+        templateVariables.put("typeReport", userOrderReportDtoPdf.typeReport());
+        templateVariables.put("rangeDate", userOrderReportDtoPdf.startDate() + " - " + userOrderReportDtoPdf.endDate());
+        templateVariables.put("payMethod", userOrderReportDtoPdf.paymentMethod());
+        templateVariables.put("status", userOrderReportDtoPdf.processStatus());
+        templateVariables.put("size", userOrderReportDtoPdf.size());
+        templateVariables.put("nameCompany", nameCompany);
+        templateVariables.put("companyLogo", companyLogo);
+
+
         return this.downloadPdfService.downloadPdf("userOrderReport", templateVariables);
     }
 }
