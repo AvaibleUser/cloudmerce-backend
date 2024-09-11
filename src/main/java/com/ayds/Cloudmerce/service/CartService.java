@@ -1,11 +1,11 @@
 package com.ayds.Cloudmerce.service;
 
 import com.ayds.Cloudmerce.model.dto.cart.*;
-import com.ayds.Cloudmerce.model.entity.CartEntity;
-import com.ayds.Cloudmerce.model.entity.OrderEntity;
-import com.ayds.Cloudmerce.model.entity.PaymentMethodEntity;
-import com.ayds.Cloudmerce.model.entity.ProcessStatusEntity;
+import com.ayds.Cloudmerce.model.dto.report.SalesDto;
+import com.ayds.Cloudmerce.model.dto.report.SalesReportDto;
+import com.ayds.Cloudmerce.model.entity.*;
 import com.ayds.Cloudmerce.repository.CartRepository;
+import com.ayds.Cloudmerce.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
@@ -14,9 +14,11 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,6 +37,8 @@ public class CartService {
     private final OrderService orderService;
     private final ProcessStatusService processStatusService;
     private final PaymentMethodService paymentMethodService;
+
+    private final UserRepository userRepository;
 
     public List<CartResponseDto> getAllCartsWithItems() {
         return cartRepository.findAll().stream()
@@ -272,6 +276,65 @@ public class CartService {
         return query.getResultList().stream()
                 .map(this::convertToCartDtoResponse)
                 .collect(Collectors.toList());
+    }
+
+    public SalesReportDto getCartsFilterWithReport(Integer userId, int size, String startDate, String endDate, String order, int cartIdInit, int processStatus, int paymentMethod) {
+        // Crear CriteriaBuilder y CriteriaQuery
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<CartEntity> cq = cb.createQuery(CartEntity.class);
+        Root<CartEntity> cart = cq.from(CartEntity.class);
+
+        // Crear lista de predicados para aplicar filtros
+        List<Predicate> predicates = new ArrayList<>();
+
+        //filtro de usuario
+        this.addFilterUser(predicates,cart,cb,userId);
+
+        //filtro de fechas inicio y final
+        this.addFilterDate(predicates,cart,startDate,endDate,cb);
+
+        // Aplicar filtro de un id de carrito para iniciar la consulta
+        this.addFilterCartInit(predicates,cart,cb,cartIdInit);
+
+        // aplica el filtro de paymethod
+        this.addFilterPayMethod(paymentMethod,predicates,cart,cb);
+
+        // aplica el filtro de processstatus
+        this.addFilterProcessSatatus(processStatus,predicates,cart,cb);
+
+        // Aplicar los predicados a la consulta
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
+        // aplica el orden especifico
+        this.addFilterOrder(cart,cq,cb,order);
+
+        // Ejecutar la consulta con el tamaño máximo de resultados
+        TypedQuery<CartEntity> query = entityManager.createQuery(cq);
+        query.setMaxResults(size);
+
+        List<CartEntity> list = query.getResultList();
+        return converSalesReportDTo(list);
+    }
+
+    private SalesDto converToSalesDto(CartEntity responseDto, List<ProcessStatusEntity> listProcess, List<PaymentMethodEntity> listPayment) {
+
+        UserEntity user = this.userRepository.findById((responseDto.getUserId())).orElse(new UserEntity());
+        String order = responseDto.getOrder() == null ? "No" : "Si";
+        return new SalesDto(responseDto.getTotal(),responseDto.getTax(),responseDto.getCreatedAt().toLocalDate().toString(),user.getName(),order,
+                this.paymentMethodService.paymentMethod(listPayment,responseDto.getPaymentMethodId()),this.processStatusService.processStatus(listProcess,responseDto.getStatusId()));
+    }
+
+    private SalesReportDto converSalesReportDTo(List<CartEntity> list){
+        List<SalesDto> salesDto = new ArrayList<>();
+        List<ProcessStatusEntity> listProcess = this.processStatusService.getAllProcessStatusEntity();
+        List<PaymentMethodEntity> listPayment = this.paymentMethodService.getAllPaymentMethodsEntity();
+        BigDecimal totalSpent = BigDecimal.ZERO;
+        for(CartEntity responseDto : list){
+            SalesDto SalesDto = this.converToSalesDto(responseDto, listProcess, listPayment);
+            salesDto.add(SalesDto);
+            totalSpent = totalSpent.add(responseDto.getTax());
+        }
+        return new SalesReportDto(salesDto,totalSpent, LocalDate.now().toString());
     }
 
 }
