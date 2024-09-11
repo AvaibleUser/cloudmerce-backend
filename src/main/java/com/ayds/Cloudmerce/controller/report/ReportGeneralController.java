@@ -1,12 +1,10 @@
 package com.ayds.Cloudmerce.controller.report;
 
-import com.ayds.Cloudmerce.model.dto.report.ReportGeneralDto;
-import com.ayds.Cloudmerce.model.dto.report.ReportGeneralPdfDto;
-import com.ayds.Cloudmerce.model.dto.report.UserSalesReportDto;
-import com.ayds.Cloudmerce.model.dto.report.UserSalesReportPdf;
+import com.ayds.Cloudmerce.model.dto.report.*;
 import com.ayds.Cloudmerce.model.entity.CompanyEntity;
 import com.ayds.Cloudmerce.repository.CompanyRepository;
 import com.ayds.Cloudmerce.service.CartResponseService;
+import com.ayds.Cloudmerce.service.report.DownloadExcelService;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.SalesReportService;
 import com.ayds.Cloudmerce.service.report.UserSalesReportService;
@@ -16,7 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -34,6 +35,9 @@ public class ReportGeneralController {
 
     @Autowired
     private CompanyRepository companyRepository;
+
+    @Autowired
+    private DownloadExcelService downloadExcelService;
 
     @GetMapping
     public ResponseEntity<Object> getReportGeneral(@RequestParam(value = "startDate", defaultValue = "2000-01-01") String startDate,
@@ -69,4 +73,42 @@ public class ReportGeneralController {
         );
         return this.downloadPdfService.downloadPdf("reportGeneral", templateVariables);
     }
+
+    @PostMapping("/download-excel")
+    ResponseEntity<byte[]>downloadReportExcel(@RequestBody ReportGeneralPdfDto reportGeneralPdfDto)throws IOException {
+        List<String> headers = new ArrayList<>();
+        headers.add("Grupo");
+        headers.add("Cantidad");
+        headers.add("Total (Q)");
+        List<Object> userObjects = new ArrayList<>();
+        userObjects.add("Productos Vendidos (no repetidos)");
+        userObjects.add(reportGeneralPdfDto.totalUniqueProducts() == null ? 0 : reportGeneralPdfDto.totalUniqueProducts());
+        userObjects.add(reportGeneralPdfDto.totalAmountSold() == null ? 0 : reportGeneralPdfDto.totalAmountSold());
+        //
+        userObjects.add("Usuarios Compras (no repetidos)");
+        userObjects.add(reportGeneralPdfDto.totalUniqueUsers() == null ? 0 : reportGeneralPdfDto.totalUniqueUsers());
+        userObjects.add(reportGeneralPdfDto.totalAmountSold() == null ? 0 : reportGeneralPdfDto.totalAmountSold());
+        //
+        userObjects.add("Ordenes");
+        userObjects.add(reportGeneralPdfDto.totalOrders() == null ? 0 : reportGeneralPdfDto.totalOrders());
+        userObjects.add(reportGeneralPdfDto.totalAmountOrd() == null ? 0 : reportGeneralPdfDto.totalAmountOrd());
+        //
+        userObjects.add("Ingreso por Envio de Odenes");
+        userObjects.add(reportGeneralPdfDto.totalOrders() == null ? 0 : reportGeneralPdfDto.totalOrders());
+        userObjects.add(reportGeneralPdfDto.totalShippingCost() == null ? 0 : reportGeneralPdfDto.totalShippingCost());
+        //
+        userObjects.add("Ventas sin Orden");
+        userObjects.add(reportGeneralPdfDto.totalSalesNoOrder() == null ? 0 : reportGeneralPdfDto.totalSalesNoOrder());
+        userObjects.add(reportGeneralPdfDto.totalAmountSoldNoOrder() == null ? 0 : reportGeneralPdfDto.totalAmountSoldNoOrder());
+        //
+        userObjects.add("Ventas");
+        userObjects.add(reportGeneralPdfDto.totalSales() == null ? 0 : reportGeneralPdfDto.totalSales());
+        userObjects.add(reportGeneralPdfDto.totalAmountSold() == null ? 0 : reportGeneralPdfDto.totalAmountSold());
+        //
+        userObjects.add("Total Ingreso (ventas (odenes) + costo envio)");
+        userObjects.add("");
+        userObjects.add(reportGeneralPdfDto.total() == null ? 0 : reportGeneralPdfDto.total());
+        return this.downloadExcelService.generateExcelReport(headers, userObjects, "reporte_ordenes");
+    }
+
 }

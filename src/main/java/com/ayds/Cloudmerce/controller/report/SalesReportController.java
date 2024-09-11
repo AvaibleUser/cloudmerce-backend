@@ -8,6 +8,7 @@ import com.ayds.Cloudmerce.repository.CompanyRepository;
 import com.ayds.Cloudmerce.repository.UserRepository;
 import com.ayds.Cloudmerce.service.CartResponseService;
 import com.ayds.Cloudmerce.service.CartService;
+import com.ayds.Cloudmerce.service.report.DownloadExcelService;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -36,6 +38,10 @@ public class SalesReportController {
 
     @Autowired
     private CompanyRepository companyRepository;
+
+    @Autowired
+    private DownloadExcelService downloadExcelService;
+
 
     @GetMapping
     public ResponseEntity<Object> getUserCart(@RequestParam(value = "size", defaultValue = "12") int size,
@@ -77,6 +83,36 @@ public class SalesReportController {
         return this.downloadPdfService.downloadPdf("SalesReport", templateVariables);
     }
 
+    @PostMapping("/download-excel")
+    ResponseEntity<byte[]>downloadReportExcel(@RequestBody SalesReportDtoPdf salesReportDtoPdf)throws IOException {
+        List<SalesDto> sales = salesReportDtoPdf.salesReportDto().sales();
+        List<String> headers = new ArrayList<>();
+        headers.add("Usuario");
+        headers.add("Metodo pago");
+        headers.add("Estado");
+        headers.add("Fecha de Compra");
+        headers.add("Orden");
+        headers.add("Impuesto");
+        headers.add("Total");
+        List<Object> userObjects = new ArrayList<>();
+        for (SalesDto sale : sales) {
+            userObjects.add(sale.user() == null ? "" : sale.user());
+            userObjects.add(sale.paymentMethod() == null ? "" : sale.paymentMethod());
+            userObjects.add(sale.status() == null ? "" : sale.status() );
+            userObjects.add(sale.createdAt() == null ? "" : sale.createdAt());
+            userObjects.add(sale.order() == null ? "" : sale.order());
+            userObjects.add(sale.tax() == null ? "" : sale.tax());
+            userObjects.add(sale.total() == null ? "" : sale.total());
+        }
+        userObjects.add("Total General");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add(salesReportDtoPdf.salesReportDto().totalSpent());
+        return this.downloadExcelService.generateExcelReport(headers, userObjects, "reporte_productos_venta");
+    }
 
 
 }

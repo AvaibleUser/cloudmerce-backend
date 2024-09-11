@@ -99,12 +99,27 @@ public class UserSalesReportController {
     }
 
     @PostMapping("/download-excel") ResponseEntity<byte[]>downloadReportExcel(@RequestBody UserSalesReportPdf userSalesReportPdf)throws IOException {
-        List<Object> userObjects = new ArrayList<>(userSalesReportPdf.userSalesReportDto().users());
+        List<UserSalesDto> users = userSalesReportPdf.userSalesReportDto().users();
         List<String> headers = new ArrayList<>();
         headers.add("Cliente");
         headers.add("NIT");
         headers.add("Cantidad Compras");
         headers.add("Total Gastado");
-        return this.downloadExcelService.generateExcelReport(headers, userObjects, "reportePrueba");
+        List<Object> userObjects = new ArrayList<>();
+        for (UserSalesDto user : users) {
+            userObjects.add(user.name() == null ? "" : user.name());
+            userObjects.add(user.nit() == null ? "" : user.nit());
+            userObjects.add(user.totalPurchases() == null ? "" : user.totalPurchases());
+            userObjects.add(user.totalSpent() == null ? "" : user.totalSpent());
+        }
+        userObjects.add("Total De Compras");
+        userObjects.add("");
+        userObjects.add(userSalesReportPdf.userSalesReportDto().totalPurchases());
+        userObjects.add("");
+        userObjects.add("Total General");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add(userSalesReportPdf.userSalesReportDto().totalSpent());
+        return this.downloadExcelService.generateExcelReport(headers, userObjects, "reporte_usuarios_venta");
     }
 }

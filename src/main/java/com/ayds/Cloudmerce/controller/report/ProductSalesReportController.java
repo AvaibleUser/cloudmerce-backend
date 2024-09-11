@@ -1,12 +1,10 @@
 package com.ayds.Cloudmerce.controller.report;
 
-import com.ayds.Cloudmerce.model.dto.report.ProductSalesPdfDto;
-import com.ayds.Cloudmerce.model.dto.report.ProductSalesReportDto;
-import com.ayds.Cloudmerce.model.dto.report.UserSalesReportDto;
-import com.ayds.Cloudmerce.model.dto.report.UserSalesReportPdf;
+import com.ayds.Cloudmerce.model.dto.report.*;
 import com.ayds.Cloudmerce.model.entity.CompanyEntity;
 import com.ayds.Cloudmerce.repository.CompanyRepository;
 import com.ayds.Cloudmerce.service.CartResponseService;
+import com.ayds.Cloudmerce.service.report.DownloadExcelService;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.ProductSalesReportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -31,6 +32,8 @@ public class ProductSalesReportController {
 
     @Autowired
     private CompanyRepository companyRepository;
+    @Autowired
+    private DownloadExcelService downloadExcelService;
 
 
     @GetMapping("/more")
@@ -76,7 +79,6 @@ public class ProductSalesReportController {
             nameCompany = companyEntity.getName();
             companyLogo = companyEntity.getLogoPath();
         }
-
         Map<String, Object> templateVariables = new HashMap<>();
         templateVariables.put("products", productSalesPdfDto.productSalesReportDto().products());
         templateVariables.put("totalPurchases", productSalesPdfDto.productSalesReportDto().totalPurchases());
@@ -92,4 +94,31 @@ public class ProductSalesReportController {
 
         return this.downloadPdfService.downloadPdf("productSalesReport", templateVariables);
     }
+
+    @PostMapping("/download-excel")
+    ResponseEntity<byte[]>downloadReportExcel(@RequestBody ProductSalesPdfDto productSalesPdfDto)throws IOException {
+        List<ProductSalesDto> products = productSalesPdfDto.productSalesReportDto().products();
+        List<String> headers = new ArrayList<>();
+        headers.add("Producto");
+        headers.add("Precio Unitario");
+        headers.add("Cantidad Comprada");
+        headers.add("Total");
+        List<Object> userObjects = new ArrayList<>();
+        for (ProductSalesDto product : products) {
+            userObjects.add(product.name() == null ? "" : product.name());
+            userObjects.add(product.price() == null ? "" : product.price());
+            userObjects.add(product.totalPurchases() == null ? "" : product.totalPurchases());
+            userObjects.add(product.totalSpent() == null ? "" : product.totalSpent());
+        }
+        userObjects.add("Total De Compras");
+        userObjects.add("");
+        userObjects.add(productSalesPdfDto.productSalesReportDto().totalPurchases());
+        userObjects.add("");
+        userObjects.add("Total General");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add(productSalesPdfDto.productSalesReportDto().totalSpent());
+        return this.downloadExcelService.generateExcelReport(headers, userObjects, "reporte_productos_venta");
+    }
+
 }
