@@ -1,10 +1,12 @@
 package com.ayds.Cloudmerce.controller.report;
 
+import com.ayds.Cloudmerce.model.dto.report.UserSalesDto;
 import com.ayds.Cloudmerce.model.dto.report.UserSalesReportDto;
 import com.ayds.Cloudmerce.model.dto.report.UserSalesReportPdf;
 import com.ayds.Cloudmerce.model.entity.CompanyEntity;
 import com.ayds.Cloudmerce.repository.CompanyRepository;
 import com.ayds.Cloudmerce.service.CartResponseService;
+import com.ayds.Cloudmerce.service.report.DownloadExcelService;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.UserSalesReportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,8 +32,12 @@ public class UserSalesReportController {
 
     @Autowired
     private DownloadPdfService downloadPdfService;
+
     @Autowired
     private CompanyRepository companyRepository;
+
+    @Autowired
+    private DownloadExcelService downloadExcelService;
 
     @GetMapping("/more")
     public ResponseEntity<Object>  getReportUserMoreShopping(@RequestParam(value = "size", defaultValue = "12") int size,
@@ -89,5 +98,28 @@ public class UserSalesReportController {
         return this.downloadPdfService.downloadPdf("userSalesReport", templateVariables);
     }
 
-
+    @PostMapping("/download-excel") ResponseEntity<byte[]>downloadReportExcel(@RequestBody UserSalesReportPdf userSalesReportPdf)throws IOException {
+        List<UserSalesDto> users = userSalesReportPdf.userSalesReportDto().users();
+        List<String> headers = new ArrayList<>();
+        headers.add("Cliente");
+        headers.add("NIT");
+        headers.add("Cantidad Compras");
+        headers.add("Total Gastado");
+        List<Object> userObjects = new ArrayList<>();
+        for (UserSalesDto user : users) {
+            userObjects.add(user.name() == null ? "" : user.name());
+            userObjects.add(user.nit() == null ? "" : user.nit());
+            userObjects.add(user.totalPurchases() == null ? "" : user.totalPurchases());
+            userObjects.add(user.totalSpent() == null ? "" : user.totalSpent());
+        }
+        userObjects.add("Total De Compras");
+        userObjects.add("");
+        userObjects.add(userSalesReportPdf.userSalesReportDto().totalPurchases());
+        userObjects.add("");
+        userObjects.add("Total General");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add(userSalesReportPdf.userSalesReportDto().totalSpent());
+        return this.downloadExcelService.generateExcelReport(headers, userObjects, "reporte_usuarios_venta");
+    }
 }

@@ -1,12 +1,10 @@
 package com.ayds.Cloudmerce.controller.report;
 
-import com.ayds.Cloudmerce.model.dto.report.ProductReportDto;
-import com.ayds.Cloudmerce.model.dto.report.ProductReportPdfDto;
-import com.ayds.Cloudmerce.model.dto.report.ProductSalesPdfDto;
-import com.ayds.Cloudmerce.model.dto.report.UserSalesReportPdf;
+import com.ayds.Cloudmerce.model.dto.report.*;
 import com.ayds.Cloudmerce.model.entity.CompanyEntity;
 import com.ayds.Cloudmerce.repository.CompanyRepository;
 import com.ayds.Cloudmerce.service.CartResponseService;
+import com.ayds.Cloudmerce.service.report.DownloadExcelService;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.ProductReportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -34,6 +35,9 @@ public class ProductReportController {
 
     @Autowired
     private CompanyRepository companyRepository;
+
+    @Autowired
+    private DownloadExcelService downloadExcelService;
 
     @GetMapping("/more")
     public ResponseEntity<Object> getReportProductMore(@RequestParam(value = "size", defaultValue = "12") int size,
@@ -85,4 +89,27 @@ public class ProductReportController {
         );
         return this.downloadPdfService.downloadPdf("productReport", templateVariables);
     }
+
+    @PostMapping("/download-excel")
+    ResponseEntity<byte[]>downloadReportExcel(@RequestBody ProductReportPdfDto productReportPdfDto)throws IOException {
+        List<ProductDTO> products = productReportPdfDto.productReportDto().products();
+        List<String> headers = new ArrayList<>();
+        headers.add("Producto");
+        headers.add("Precio");
+        headers.add("Fecha Registro");
+        headers.add("Stock");
+        List<Object> userObjects = new ArrayList<>();
+        for (ProductDTO product : products) {
+            userObjects.add(product.name() == null ? "" : product.name());
+            userObjects.add(product.price() == null ? "" : product.price());
+            userObjects.add(product.creationAt() == null ? "" : product.creationAt() );
+            userObjects.add(product.stock() == null ? "" : product.stock());
+        }
+        userObjects.add("Total General");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add(productReportPdfDto.productReportDto().totalStock());
+        return this.downloadExcelService.generateExcelReport(headers, userObjects, "reporte_ordenes");
+    }
+
 }

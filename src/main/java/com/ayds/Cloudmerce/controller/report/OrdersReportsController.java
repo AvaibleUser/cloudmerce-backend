@@ -1,10 +1,12 @@
 package com.ayds.Cloudmerce.controller.report;
 
+import com.ayds.Cloudmerce.model.dto.cart.OrderDTO;
 import com.ayds.Cloudmerce.model.dto.cart.OrderResponseDto;
 import com.ayds.Cloudmerce.model.dto.report.*;
 import com.ayds.Cloudmerce.model.entity.CompanyEntity;
 import com.ayds.Cloudmerce.repository.CompanyRepository;
 import com.ayds.Cloudmerce.service.*;
+import com.ayds.Cloudmerce.service.report.DownloadExcelService;
 import com.ayds.Cloudmerce.service.report.DownloadPdfService;
 import com.ayds.Cloudmerce.service.report.OrderReportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +39,9 @@ public class OrdersReportsController {
 
     @Autowired
     private CompanyRepository companyRepository;
+
+    @Autowired
+    private DownloadExcelService downloadExcelService;
 
     @GetMapping("/users/more")
     public ResponseEntity<Object>  getReportUserMoreShopping(@RequestParam(value = "size", defaultValue = "12") int size,
@@ -133,4 +140,68 @@ public class OrdersReportsController {
 
         return this.downloadPdfService.downloadPdf("userOrderReport", templateVariables);
     }
+
+    @PostMapping("/download-excel")
+    ResponseEntity<byte[]>downloadReportExcel(@RequestBody OrdersReportPdfDto ordersReportPdfDto)throws IOException {
+        List<OrderDto> orders = ordersReportPdfDto.orderReportDto().orders();
+        List<String> headers = new ArrayList<>();
+        headers.add("Cliente");
+        headers.add("Fecha de Orden");
+        headers.add("Fecha de Envio");
+        headers.add("Fecha de Entrega");
+        headers.add("Total");
+        List<Object> userObjects = new ArrayList<>();
+        for (OrderDto order : orders) {
+            userObjects.add(order.user() == null ? "" : order.user());
+            userObjects.add(order.orderDate() == null ? "" : order.orderDate());
+            userObjects.add(order.shippingDate() == null ? "" : order.shippingDate() );
+            userObjects.add(order.deliveryDate() == null ? "" : order.deliveryDate());
+            userObjects.add(order.total() == null ? "" : order.total());
+        }
+        userObjects.add("Total General");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add(ordersReportPdfDto.orderReportDto().totalSpent());
+        return this.downloadExcelService.generateExcelReport(headers, userObjects, "reporte_ordenes");
+    }
+
+    @PostMapping("/users/download-excel")
+    ResponseEntity<byte[]>downloadReportExcelUser(@RequestBody UserOrderReportDtoPdf userOrderReportDtoPdf)throws IOException {
+        List<UserOrderDto> users = userOrderReportDtoPdf.userOrderReportDto().users();
+        List<String> headers = new ArrayList<>();
+        headers.add("Cliente");
+        headers.add("NIT");
+        headers.add("Cantidad Ordenes");
+        headers.add("Total de Costo Envio");
+        headers.add("Total Gastado");
+        List<Object> userObjects = new ArrayList<>();
+        for (UserOrderDto user : users) {
+            userObjects.add(user.name() == null ? "" : user.name());
+            userObjects.add(user.nit() == null ? "" : user.nit());
+            userObjects.add(user.totalPurchases() == null ? "" : user.totalPurchases() );
+            userObjects.add(user.totalCostDelivery() == null ? "" : user.totalCostDelivery());
+            userObjects.add(user.totalSpent() == null ? "" : user.totalSpent());
+        }
+        userObjects.add("Total Ventas");
+        userObjects.add("");
+        userObjects.add(userOrderReportDtoPdf.userOrderReportDto().totalPurchases());
+        userObjects.add("");
+        userObjects.add("");
+        //
+        userObjects.add("Total por envio");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add(userOrderReportDtoPdf.userOrderReportDto().totalCostDelivery());
+        userObjects.add("");
+        //
+        userObjects.add("Total General");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add("");
+        userObjects.add(userOrderReportDtoPdf.userOrderReportDto().totalSpent());
+        return this.downloadExcelService.generateExcelReport(headers, userObjects, "reporte_usuarios_orden");
+    }
+
+
 }
