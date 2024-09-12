@@ -7,6 +7,7 @@ public record TokenDto(
         @NonNull Long id,
         @NonNull String name,
         @NonNull String email,
+        @NonNull Boolean temporal,
         @NonNull String role,
         @NonNull String paymentMethod) {
 }

@@ -19,8 +19,8 @@ public class ProductNotificationService {
     private ProductNotificationRepository notificationRepository;
 
     private static ProductNotificationDto toNotificationDto(ProductNotificationEntity notification) {
-        return new ProductNotificationDto(notification.getId(), notification.getStatus(), notification.getDescription(),
-                notification.getCreatedAt(), notification.getProduct().getId());
+        return new ProductNotificationDto(notification.getId(), notification.getStatus(), notification.getStock(),
+                notification.getCreatedAt(), notification.getProduct().getName());
     }
 
     public List<ProductNotificationDto> findAllNotifications(boolean unread) {

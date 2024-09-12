@@ -40,7 +40,7 @@ public class ProductNotificationEntity {
     private NotificationStatus status;
 
     @NonNull
-    private String description;
+    private Integer stock;
 
     @Column(name = "registration_date")
     @CreationTimestamp

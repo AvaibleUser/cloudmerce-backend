@@ -9,7 +9,7 @@ import lombok.NonNull;
 public record ProductNotificationDto(
         @NonNull Long id,
         @NonNull NotificationStatus status,
-        @NonNull String description,
+        @NonNull Integer stock,
         @NonNull Instant createdAt,
-        @NonNull Long productId) {
+        @NonNull String product) {
 }

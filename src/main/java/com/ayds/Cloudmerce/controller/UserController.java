@@ -44,7 +44,7 @@ public class UserController {
 
     private TokenDto addTokenToUserData(UserWithGoogleSecretDto user) {
         String token = tokenService.generateAccessToken(user.id());
-        return new TokenDto(token, user.id(), user.name(), user.email(), user.role(), user.paymentMethod());
+        return new TokenDto(token, user.id(), user.name(), user.email(), false, user.role(), user.paymentMethod());
     }
 
     @GetMapping("/me")
@@ -58,8 +58,9 @@ public class UserController {
     public ResponseEntity<TokenDto> changePassword(@NonNull HttpServletRequest request,
             @RequestBody @Valid UserChangeDto user) {
         long id = tokenService.getIdFromToken(request);
+        boolean temporal = tokenService.isTemporalToken(request);
 
-        UserWithGoogleSecretDto dbUser = userService.changeUserInfo(id, user);
+        UserWithGoogleSecretDto dbUser = userService.changeUserInfo(id, user, temporal);
 
         return ResponseEntity.ok(addTokenToUserData(dbUser));
     }

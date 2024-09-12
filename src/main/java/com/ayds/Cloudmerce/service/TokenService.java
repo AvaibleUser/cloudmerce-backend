@@ -26,10 +26,11 @@ public class TokenService {
     @Autowired
     private Algorithm algorithm;
 
-    private String generateAccessToken(long id, long minutes) {
+    private String generateAccessToken(long id, long minutes, boolean temporal) {
         try {
             return JWT.create()
                     .withSubject(String.valueOf(id))
+                    .withClaim("temporal", temporal)
                     .withExpiresAt(genAccessExpirationDate(minutes))
                     .sign(algorithm);
         } catch (JWTCreationException exception) {
@@ -38,11 +39,25 @@ public class TokenService {
     }
 
     public String generateAccessToken(long id) {
-        return generateAccessToken(id, expirationTimeMin);
+        return generateAccessToken(id, expirationTimeMin, false);
     }
 
     public String generateTemporalAccessToken(long id) {
-        return generateAccessToken(id, tempExpirationTimeMin);
+        return generateAccessToken(id, tempExpirationTimeMin, true);
+    }
+
+    public boolean isTemporalToken(HttpServletRequest request) {
+        try {
+            Boolean temporal = JWT.require(algorithm)
+                    .build()
+                    .verify(recoverToken(request))
+                    .getClaim("temporal")
+                    .asBoolean();
+
+            return Boolean.TRUE.equals(temporal);
+        } catch (JWTVerificationException exception) {
+            throw new JWTVerificationException("Error while validating token", exception);
+        }
     }
 
     public long getIdFromToken(HttpServletRequest request) {

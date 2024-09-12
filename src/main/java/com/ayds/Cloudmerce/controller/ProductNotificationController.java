@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
 @RestController
-@RequestMapping("/api/products/notifications")
+@RequestMapping("/api/dashboard/products/notifications")
 public class ProductNotificationController {
 
     @Autowired
@@ -44,10 +44,9 @@ public class ProductNotificationController {
     }
 
     @PatchMapping("/{notificationId}")
-    public ResponseEntity<ProductNotificationDto> patchNotificationStatus(@PathVariable @Positive long categoryId,
-            @RequestBody @Valid CategoryUpdateDto category) {
-        ProductNotificationDto updatedCategory = notificationService.updateNotificationStatusToRead(categoryId);
+    public ResponseEntity<ProductNotificationDto> patchNotificationStatus(@PathVariable @Positive long notificationId) {
+        ProductNotificationDto updatedNotification = notificationService.updateNotificationStatusToRead(notificationId);
 
-        return ResponseEntity.ok(updatedCategory);
+        return ResponseEntity.ok(updatedNotification);
     }
 }

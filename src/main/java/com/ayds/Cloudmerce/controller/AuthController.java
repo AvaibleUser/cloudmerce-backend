@@ -62,16 +62,16 @@ public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    private TokenDto addTokenToUserData(String token, UserWithGoogleSecretDto user) {
-        return new TokenDto(token, user.id(), user.name(), user.email(), user.role(), user.paymentMethod());
+    private TokenDto addTokenToUserData(String token, boolean temporal, UserWithGoogleSecretDto user) {
+        return new TokenDto(token, user.id(), user.name(), user.email(), temporal, user.role(), user.paymentMethod());
     }
 
     private TokenDto addAccessTokenToUserData(UserWithGoogleSecretDto user) {
-        return addTokenToUserData(tokenService.generateAccessToken(user.id()), user);
+        return addTokenToUserData(tokenService.generateAccessToken(user.id()), false, user);
     }
 
     private TokenDto addTemporalTokenToUserData(UserWithGoogleSecretDto user) {
-        return addTokenToUserData(tokenService.generateTemporalAccessToken(user.id()), user);
+        return addTokenToUserData(tokenService.generateTemporalAccessToken(user.id()), true, user);
     }
 
     @PostMapping("/sign-up")

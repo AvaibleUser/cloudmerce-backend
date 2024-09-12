@@ -132,7 +132,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserWithGoogleSecretDto changeUserInfo(Long userId, UserChangeDto user) {
+    public UserWithGoogleSecretDto changeUserInfo(Long userId, UserChangeDto user, boolean matchesInactive) {
         UserEntity dbUser = userRepository.findById(userId).get();
 
         user.address()
@@ -146,7 +146,7 @@ public class UserService {
 
         user.currentPassword()
                 .filter(not(ObjectUtils::isEmpty))
-                .filter(passwd -> encoder.matches(passwd, dbUser.getPassword()))
+                .filter(passwd -> matchesInactive || encoder.matches(passwd, dbUser.getPassword()))
                 .flatMap(passwd -> user.newPassword())
                 .filter(not(ObjectUtils::isEmpty))
                 .map(encoder::encode)
