@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,17 +77,15 @@ public class ProductReportController {
             nameCompany = companyEntity.getName();
             companyLogo = companyEntity.getLogoPath();
         }
-
-        Map<String, Object> templateVariables = Map.of(
-                "products", productReportPdfDto.productReportDto().products(),
-                "totalStock", productReportPdfDto.productReportDto().totalStock(),
-                "dateReport", productReportPdfDto.productReportDto().dateReport(),
-                "typeReport", productReportPdfDto.typeReport(),
-                "rangeDate", productReportPdfDto.startDate() + " - " + productReportPdfDto.endDate(),
-                "size", productReportPdfDto.size(),
-                "nameCompany", nameCompany,
-                "companyLogo", companyLogo
-        );
+        Map<String, Object> templateVariables = new HashMap<>();
+        templateVariables.put("products", productReportPdfDto.productReportDto().products());
+        templateVariables.put("totalStock", productReportPdfDto.productReportDto().totalStock());
+        templateVariables.put("dateReport", productReportPdfDto.productReportDto().dateReport());
+        templateVariables.put("typeReport", productReportPdfDto.typeReport());
+        templateVariables.put("rangeDate", productReportPdfDto.startDate() + " - " + productReportPdfDto.endDate());
+        templateVariables.put("size", productReportPdfDto.size());
+        templateVariables.put("nameCompany", nameCompany);
+        templateVariables.put("companyLogo", companyLogo);
         return this.downloadPdfService.downloadPdf("productReport", templateVariables);
     }
 

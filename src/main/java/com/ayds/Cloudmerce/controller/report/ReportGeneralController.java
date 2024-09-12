@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,12 +66,11 @@ public class ReportGeneralController {
             nameCompany = companyEntity.getName();
             companyLogo = companyEntity.getLogoPath();
         }
+        Map<String, Object> templateVariables = new HashMap<>();
+        templateVariables.put("report", reportGeneralPdfDto);
+        templateVariables.put("nameCompany", nameCompany);
+        templateVariables.put("companyLogo", companyLogo);
 
-        Map<String, Object> templateVariables = Map.of(
-                "report", reportGeneralPdfDto,
-                "nameCompany", nameCompany,
-                "companyLogo", companyLogo
-        );
         return this.downloadPdfService.downloadPdf("reportGeneral", templateVariables);
     }
 
