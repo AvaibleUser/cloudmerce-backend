@@ -50,6 +50,7 @@ public class UserEntity {
     @NonNull
     private String password;
 
+    @Column(name = "google_auth_key")
     private String googleAuthKey;
 
     @CreationTimestamp
